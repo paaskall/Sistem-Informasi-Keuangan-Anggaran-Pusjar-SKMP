@@ -1,0 +1,55 @@
+mkdir -p ~/sikap/public/css/pages
+cat > ~/sikap/public/css/pages/target.css << 'CSSEOF'
+/* ============================================================
+   SIKAP — Target Page
+   ============================================================ */
+
+.input-nominal {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+/* Accordion */
+.detail-expand {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.detail-expand.open {
+    max-height: 5000px;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+}
+.chevron-icon.rotate {
+    transform: rotate(180deg);
+}
+
+tr[data-target-id] {
+    cursor: pointer;
+}
+
+/* Form detail row */
+.detail-item {
+    animation: slideIn 0.2s ease-out;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.detail-item.removing {
+    animation: slideOut 0.15s ease-in forwards;
+}
+@keyframes slideOut {
+    to { opacity: 0; transform: translateX(-10px); }
+}
+
+/* Form detail row layout */
+.form-detail-row {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+}
+CSSEOF

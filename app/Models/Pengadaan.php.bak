@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Pengadaan extends Model
+{
+    use HasFactory, SoftDeletes, Auditable;
+
+    protected $fillable = [
+        'kode', 'nama', 'jenis_pengadaan_id', 'status_id', 'progress',
+    ];
+
+    protected $casts = [
+        'progress' => 'integer',
+    ];
+
+    public function jenisPengadaan()
+    {
+        return $this->belongsTo(JenisPengadaan::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+}

@@ -1,0 +1,470 @@
+// ============================================================
+// SIKAP - User Management (with Admin Password Confirmation)
+// ============================================================
+
+(function () {
+    const DATA = window.USER_DATA;
+    let CURRENT_USER_ID = null;
+
+    function buildRoute(template, id) {
+        return template.replace('__ID__', id);
+    }
+
+    async function apiCall(method, url, body) {
+        const opts = {
+            method,
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': DATA.csrf,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        };
+        if (body) {
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        const res = await fetch(url, opts);
+        const json = await res.json().catch(() => ({}));
+        return { ok: res.ok, status: res.status, data: json };
+    }
+
+    // ⭐ KONFIRMASI PASSWORD ADMIN
+    async function confirmAdminPassword(message) {
+        const { value: password } = await Swal.fire({
+            title: '',
+            html: `
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-red-50 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Password</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">${message}</p>
+                </div>
+                <div class="text-left">
+                    <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                        Password Anda
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <input 
+                            id="swal-confirm-password" 
+                            type="password" 
+                            placeholder="Masukkan password Anda"
+                            class="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition"
+                            autocomplete="current-password"
+                        />
+                        <button 
+                            type="button"
+                            onclick="toggleSwalPassword()"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                            <svg id="swal-eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-2 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Aksi ini memerlukan verifikasi password untuk keamanan
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Konfirmasi',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-2xl p-6',
+                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg mx-1 transition',
+                cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-5 py-2.5 rounded-lg mx-1 transition',
+                actions: 'gap-2 mt-4',
+            },
+            buttonsStyling: false,
+            didOpen: () => {
+                // Auto focus input
+                const input = document.getElementById('swal-confirm-password');
+                if (input) {
+                    input.focus();
+                    // Enter untuk submit
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            Swal.clickConfirm();
+                        }
+                    });
+                }
+            },
+            preConfirm: () => {
+                const input = document.getElementById('swal-confirm-password');
+                const password = input ? input.value : '';
+                if (!password) {
+                    Swal.showValidationMessage('Password wajib diisi');
+                    return false;
+                }
+                return password;
+            }
+        });
+
+        if (!password) return false;
+
+        // Tampilkan loading
+        Swal.fire({
+            title: 'Memverifikasi...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rounded-2xl' },
+        });
+
+        const res = await fetch('/confirm-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': DATA.csrf,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ password }),
+        });
+
+        const json = await res.json();
+        Swal.close();
+
+        if (json.ok) {
+            toastSuccess('Konfirmasi berhasil');
+            return true;
+        } else {
+            toastError(json.message || 'Password salah');
+            return false;
+        }
+    }
+
+    // ⭐ Toggle show/hide password di SweetAlert
+    window.toggleSwalPassword = function() {
+        const input = document.getElementById('swal-confirm-password');
+        const icon = document.getElementById('swal-eye-icon');
+        if (!input || !icon) return;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+            `;
+        } else {
+            input.type = 'password';
+            icon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            `;
+        }
+    };
+
+    function roleBadge(role, label) {
+        const colors = {
+            admin: 'bg-blue-100 text-blue-700',
+            keuangan: 'bg-emerald-100 text-emerald-700',
+            pimpinan: 'bg-purple-100 text-purple-700',
+            viewer: 'bg-gray-100 text-gray-700',
+        };
+        const cls = colors[role] || 'bg-gray-100 text-gray-700';
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${label}</span>`;
+    }
+
+    function renderTable(users) {
+        const tbody = document.getElementById('user-table-body');
+
+        if (!users || users.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">Belum ada user</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = users.map(u => {
+            const isSelf = u.id === CURRENT_USER_ID;
+            const statusBadge = u.active
+                ? '<span class="text-green-700 bg-green-100 px-2 py-1 rounded-full text-xs font-semibold">Aktif</span>'
+                : '<span class="text-gray-500 bg-gray-100 px-2 py-1 rounded-full text-xs font-semibold">Nonaktif</span>';
+
+            const toggleIcon = u.active ? 'toggle-right' : 'toggle-left';
+            const disableSelf = isSelf ? 'disabled opacity-50 cursor-not-allowed' : '';
+
+            return `
+                <tr class="hover:bg-blue-50/40 transition">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-700 to-blue-500 flex items-center justify-center text-white text-sm font-bold">
+                                ${u.initial}
+                            </div>
+                            <span class="font-medium text-gray-800">${u.name}</span>
+                            ${isSelf ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold ml-1">ANDA</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600 font-mono text-xs">${u.username}</td>
+                    <td class="px-4 py-3">${roleBadge(u.role, u.role_label)}</td>
+                    <td class="px-4 py-3 text-gray-600 text-xs">${u.unit || '-'}</td>
+                    <td class="px-4 py-3">${statusBadge}</td>
+                    <td class="px-4 py-3 text-right">
+                        <button type="button" onclick="toggleActive(${u.id})"
+                            class="text-amber-600 hover:bg-amber-100 px-2 py-1 rounded transition ${disableSelf}"
+                            title="Toggle Status" ${isSelf ? 'disabled' : ''}>
+                            <i data-lucide="${toggleIcon}" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="editUser(${u.id})"
+                            class="text-blue-700 hover:bg-blue-100 px-2 py-1 rounded transition ml-1" title="Edit">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="deleteUser(${u.id})"
+                            class="text-red-600 hover:bg-red-100 px-2 py-1 rounded transition ml-1 ${disableSelf}"
+                            title="Hapus" ${isSelf ? 'disabled' : ''}>
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    async function reload() {
+        const res = await apiCall('GET', DATA.routes.data);
+        if (res.ok) {
+            CURRENT_USER_ID = res.data.current_user_id;
+            renderTable(res.data.users);
+        } else {
+            toastError('Gagal memuat data user');
+        }
+    }
+
+    // ============ FORM ============
+    function buildForm(user) {
+        const isEdit = !!user;
+        const units = DATA.references.units || [];
+        const currentUnit = user ? user.unit : '';
+
+        return `<div class="text-left space-y-3 text-sm mt-2">
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Nama Lengkap <span class="text-red-500">*</span></label>
+                <input id="f-name" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    value="${user ? user.name : ''}" placeholder="Nama lengkap" />
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Username <span class="text-red-500">*</span></label>
+                <input id="f-username" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono"
+                    value="${user ? user.username : ''}" placeholder="username" />
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
+                    Password ${isEdit ? '<span class="text-gray-400 normal-case">(kosongkan jika tidak diubah)</span>' : '<span class="text-red-500">*</span>'}
+                </label>
+                <input id="f-password" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    value="${isEdit ? '' : 'entersaja1234'}" placeholder="Min 8 karakter, ada huruf besar & angka" />
+                <p class="text-[10px] text-gray-500 mt-1">Minimal 8 karakter, harus ada huruf besar, huruf kecil, dan angka.</p>
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Role <span class="text-red-500">*</span></label>
+                <select id="f-role" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="admin" ${user && user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="keuangan" ${user && user.role === 'keuangan' ? 'selected' : ''}>User Keuangan</option>
+                    <option value="pimpinan" ${user && user.role === 'pimpinan' ? 'selected' : ''}>Pimpinan</option>
+                    <option value="viewer" ${user && user.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Unit <span class="text-red-500">*</span></label>
+                <select id="f-unit" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="">- Pilih Unit -</option>
+                    ${units.map(u => `<option value="${u}" ${currentUnit === u ? 'selected' : ''}>${u}</option>`).join('')}
+                </select>
+            </div>
+        </div>`;
+    }
+
+    function collectForm() {
+        return {
+            name: document.getElementById('f-name').value.trim(),
+            username: document.getElementById('f-username').value.trim(),
+            password: document.getElementById('f-password').value.trim(),
+            role: document.getElementById('f-role').value,
+            unit: document.getElementById('f-unit').value,
+        };
+    }
+
+    // ============ PUBLIC ACTIONS ============
+    window.openUserForm = async function () {
+        await reload();
+        Swal.fire({
+            title: 'Tambah User',
+            width: 520,
+            html: buildForm(null),
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'bg-blue-700 hover:bg-blue-800 text-white font-medium px-5 py-2.5 rounded-lg mx-1',
+                cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-5 py-2.5 rounded-lg mx-1',
+            },
+            buttonsStyling: false,
+            didOpen: () => { if (window.lucide) lucide.createIcons(); },
+            preConfirm: () => {
+                const data = collectForm();
+                if (!data.name || !data.username || !data.password || !data.role || !data.unit) {
+                    Swal.showValidationMessage('Semua field wajib diisi');
+                    return false;
+                }
+                return data;
+            }
+        }).then(async (r) => {
+            if (!r.isConfirmed) return;
+            const res = await apiCall('POST', DATA.routes.store, r.value);
+            if (res.ok) {
+                toastSuccess(res.data.message);
+                reload();
+            } else {
+                const errors = res.data.errors || {};
+                const first = Object.values(errors)[0];
+                toastError(Array.isArray(first) ? first[0] : (res.data.message || 'Gagal menyimpan'));
+            }
+        });
+    };
+
+    window.editUser = async function (id) {
+        const resData = await apiCall('GET', DATA.routes.data);
+        if (!resData.ok) return;
+        const user = resData.data.users.find(u => u.id === id);
+        if (!user) return;
+
+        Swal.fire({
+            title: 'Edit User',
+            width: 520,
+            html: buildForm(user),
+            showCancelButton: true,
+            confirmButtonText: 'Update',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'bg-blue-700 hover:bg-blue-800 text-white font-medium px-5 py-2.5 rounded-lg mx-1',
+                cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-5 py-2.5 rounded-lg mx-1',
+            },
+            buttonsStyling: false,
+            didOpen: () => { if (window.lucide) lucide.createIcons(); },
+            preConfirm: () => {
+                const data = collectForm();
+                if (!data.name || !data.username || !data.role || !data.unit) {
+                    Swal.showValidationMessage('Nama, username, role, dan unit wajib diisi');
+                    return false;
+                }
+                return data;
+            }
+        }).then(async (r) => {
+            if (!r.isConfirmed) return;
+            const url = buildRoute(DATA.routes.update, id);
+            const res = await apiCall('PUT', url, r.value);
+
+            if (res.ok) {
+                toastSuccess(res.data.message);
+                reload();
+                return;
+            }
+
+            // ⭐ Butuh konfirmasi password
+            if (res.status === 423 || res.data.require_confirmation) {
+                const ok = await confirmAdminPassword(res.data.message || 'Perubahan password user lain memerlukan konfirmasi password Anda.');
+                if (!ok) return;
+
+                const retry = await apiCall('PUT', url, r.value);
+                if (retry.ok) {
+                    toastSuccess(retry.data.message);
+                    reload();
+                } else {
+                    const errors = retry.data.errors || {};
+                    const first = Object.values(errors)[0];
+                    toastError(Array.isArray(first) ? first[0] : (retry.data.message || 'Gagal menyimpan'));
+                }
+                return;
+            }
+
+            const errors = res.data.errors || {};
+            const first = Object.values(errors)[0];
+            toastError(Array.isArray(first) ? first[0] : (res.data.message || 'Gagal menyimpan'));
+        });
+    };
+
+    window.toggleActive = async function (id) {
+        const url = buildRoute(DATA.routes.toggle, id);
+        const res = await apiCall('PATCH', url);
+
+        if (res.ok) {
+            toastSuccess(res.data.message);
+            reload();
+            return;
+        }
+
+        // ⭐ Butuh konfirmasi password
+        if (res.status === 423 || res.data.require_confirmation) {
+            const ok = await confirmAdminPassword(res.data.message || 'Aksi ini memerlukan konfirmasi password Anda.');
+            if (!ok) return;
+
+            const retry = await apiCall('PATCH', url);
+            if (retry.ok) {
+                toastSuccess(retry.data.message);
+                reload();
+            } else {
+                toastError(retry.data.message || 'Gagal toggle status');
+            }
+            return;
+        }
+
+        toastError(res.data.message || 'Gagal toggle status');
+    };
+
+    window.deleteUser = async function (id) {
+        const confirm = await Swal.fire({
+            title: 'Hapus user ini?',
+            text: 'User akan dihapus (soft delete).',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2.5 rounded-lg mx-1',
+                cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-5 py-2.5 rounded-lg mx-1',
+            },
+            buttonsStyling: false,
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        const url = buildRoute(DATA.routes.destroy, id);
+        const res = await apiCall('DELETE', url);
+
+        if (res.ok) {
+            toastSuccess(res.data.message);
+            reload();
+            return;
+        }
+
+        // ⭐ Butuh konfirmasi password
+        if (res.status === 423 || res.data.require_confirmation) {
+            const ok = await confirmAdminPassword(res.data.message || 'Penghapusan user memerlukan konfirmasi password Anda.');
+            if (!ok) return;
+
+            const retry = await apiCall('DELETE', url);
+            if (retry.ok) {
+                toastSuccess(retry.data.message);
+                reload();
+            } else {
+                toastError(retry.data.message || 'Gagal menghapus');
+            }
+            return;
+        }
+
+        toastError(res.data.message || 'Gagal menghapus');
+    };
+
+    // ============ INIT ============
+    document.addEventListener('DOMContentLoaded', reload);
+})();

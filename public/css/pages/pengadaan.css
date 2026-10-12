@@ -1,0 +1,100 @@
+/* ============================================================
+   SIKAP — Pengadaan
+   ============================================================ */
+
+/* Progress Bar */
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-fill.fill-0    { background: linear-gradient(90deg, #9ca3af, #d1d5db); }
+.progress-fill.fill-low  { background: linear-gradient(90deg, #dc2626, #f87171); }
+.progress-fill.fill-mid  { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.progress-fill.fill-high { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
+.progress-fill.fill-done { background: linear-gradient(90deg, #059669, #34d399); }
+
+/* Tahapan Row */
+.tahapan-row {
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.tahapan-row:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.tahapan-row.selesai {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-color: #bbf7d0;
+}
+
+.tahapan-row.selesai .tahapan-nama {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+/* Checkbox */
+.tahapan-checkbox {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.tahapan-checkbox:hover {
+    border-color: #3b82f6;
+}
+
+.tahapan-checkbox:checked {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: #059669;
+}
+
+.tahapan-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Kendala Badge */
+.kendala-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    background: #fef3c7;
+    color: #92400e;
+}

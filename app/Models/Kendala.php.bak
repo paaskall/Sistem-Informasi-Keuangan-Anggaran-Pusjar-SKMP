@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Kendala extends Model
+{
+    use HasFactory, SoftDeletes, Auditable;
+
+    protected $fillable = [
+        'tanggal', 'periode', 'kategori_kendala_id', 'deskripsi',
+        'dampak', 'tindak_lanjut', 'status', 'user_id',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'periode' => 'integer',
+    ];
+
+    public function kategoriKendala()
+    {
+        return $this->belongsTo(KategoriKendala::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
