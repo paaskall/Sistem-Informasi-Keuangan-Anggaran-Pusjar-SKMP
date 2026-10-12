@@ -13,7 +13,7 @@
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 9px;
-            color: #1f2937;
+            color: #000000;
             margin: 0;
             padding: 0;
         }
@@ -26,13 +26,13 @@
         .subtitle {
             text-align: center;
             font-size: 10px;
-            color: #6b7280;
+            color: #000000;
             margin-bottom: 2px;
         }
         .meta {
             text-align: center;
             font-size: 8px;
-            color: #9ca3af;
+            color: #000000;
             margin-bottom: 14px;
         }
         .summary {
@@ -53,7 +53,7 @@
         .summary .label {
             font-size: 7px;
             text-transform: uppercase;
-            color: #6b7280;
+            color: #000000;
             font-weight: bold;
             letter-spacing: 0.5px;
             margin-bottom: 3px;
@@ -62,6 +62,7 @@
             font-size: 12px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
+            color: #000000;
         }
         table.data {
             width: 100%;
@@ -70,7 +71,7 @@
         }
         table.data thead th {
             background: #1e40af;
-            color: white;
+            color: #ffffff;
             padding: 6px 5px;
             font-size: 8px;
             text-align: left;
@@ -91,7 +92,7 @@
         }
         .month-summary {
             font-size: 8px;
-            color: #374151;
+            color: #000000;
             padding: 4px 8px;
             background: #f3f4f6;
             border: 1px solid #e5e7eb;
@@ -123,6 +124,7 @@
             border-bottom: 1px solid #f3f4f6;
             font-size: 8px;
             vertical-align: top;
+            color: #000000;
         }
         table.data tbody td.right {
             text-align: right;
@@ -136,17 +138,17 @@
         .komponen-row {
             padding-left: 28px !important;
         }
-        .cap-100 { color: #059669; font-weight: bold; }
-        .cap-70 { color: #1e40af; font-weight: bold; }
-        .cap-40 { color: #d97706; font-weight: bold; }
-        .cap-low { color: #dc2626; font-weight: bold; }
+        .cap-100 { color: #000000; font-weight: bold; }
+        .cap-70 { color: #000000; font-weight: bold; }
+        .cap-40 { color: #000000; font-weight: bold; }
+        .cap-low { color: #000000; font-weight: bold; }
         .footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             font-size: 7px;
-            color: #9ca3af;
+            color: #000000;
             text-align: center;
             border-top: 1px solid #e5e7eb;
             padding-top: 4px;
@@ -164,17 +166,17 @@
     <tr>
         <td class="card">
             <div class="label">Total Target</div>
-            <div class="value" style="color:#1e40af;">Rp{{ number_format($total_target, 0, ',', '.') }}</div>
+            <div class="value">Rp{{ number_format($total_target, 0, ',', '.') }}</div>
         </td>
         <td style="width: 8px;"></td>
         <td class="card">
             <div class="label">Total Realisasi</div>
-            <div class="value" style="color:#047857;">Rp{{ number_format($total_realisasi, 0, ',', '.') }}</div>
+            <div class="value">Rp{{ number_format($total_realisasi, 0, ',', '.') }}</div>
         </td>
         <td style="width: 8px;"></td>
         <td class="card">
             <div class="label">Capaian</div>
-            <div class="value" style="color:#d97706;">{{ $capaian }}%</div>
+            <div class="value">{{ $capaian }}%</div>
         </td>
     </tr>
 </table>
@@ -194,8 +196,8 @@
         {{ $bulan['bulan_nama'] }} {{ $tahun }}
     </div>
     <div class="month-summary">
-        Target: <strong style="color:#1e40af;">Rp{{ number_format($bulan['target'], 0, ',', '.') }}</strong> &nbsp;|&nbsp;
-        Realisasi: <strong style="color:#047857;">Rp{{ number_format($bulan['realisasi'], 0, ',', '.') }}</strong> &nbsp;|&nbsp;
+        Target: <strong>Rp{{ number_format($bulan['target'], 0, ',', '.') }}</strong> &nbsp;|&nbsp;
+        Realisasi: <strong>Rp{{ number_format($bulan['realisasi'], 0, ',', '.') }}</strong> &nbsp;|&nbsp;
         Capaian: <strong class="{{ $capClass($bulan['capaian']) }}">{{ $bulan['capaian'] }}%</strong>
     </div>
 
@@ -225,7 +227,7 @@
         @endphp
         <div class="program-header">
             [{{ $g['program']['kode'] ?? '???' }}] {{ $g['program']['nama'] ?? 'Tidak diketahui' }}
-            &nbsp;&mdash;&nbsp; T: Rp{{ number_format($g['target'], 0, ',', '.') }}
+            &nbsp;-&nbsp; T: Rp{{ number_format($g['target'], 0, ',', '.') }}
             &nbsp;|&nbsp; R: Rp{{ number_format($g['realisasi'], 0, ',', '.') }}
             &nbsp;|&nbsp; Cap: <span class="{{ $capClass($progCap) }}">{{ $progCap }}%</span>
         </div>
@@ -236,7 +238,7 @@
             @endphp
             <div class="sub-header">
                 [{{ $s['sub_kegiatan']['kode'] ?? '-' }}] {{ $s['sub_kegiatan']['nama'] ?? 'Tanpa Sub-Kegiatan' }}
-                &nbsp;&mdash;&nbsp; T: Rp{{ number_format($s['target'], 0, ',', '.') }}
+                &nbsp;-&nbsp; T: Rp{{ number_format($s['target'], 0, ',', '.') }}
                 &nbsp;|&nbsp; R: Rp{{ number_format($s['realisasi'], 0, ',', '.') }}
                 &nbsp;|&nbsp; Cap: <span class="{{ $capClass($subCap) }}">{{ $subCap }}%</span>
             </div>
@@ -254,11 +256,11 @@
                     @foreach ($s['komponens'] as $d)
                         <tr>
                             <td class="komponen-row">
-                                <span style="color:#059669; font-family:monospace; font-weight:bold;">{{ $d['komponen_belanja']['kode'] ?? '-' }}</span>
+                                <span style="font-family:monospace; font-weight:bold;">{{ $d['komponen_belanja']['kode'] ?? '-' }}</span>
                                 &nbsp;{{ $d['komponen_belanja']['nama'] ?? '-' }}
                             </td>
-                            <td class="right" style="color:#1e40af;">Rp{{ number_format($d['target'], 0, ',', '.') }}</td>
-                            <td class="right" style="color:#047857;">Rp{{ number_format($d['realisasi'], 0, ',', '.') }}</td>
+                            <td class="right">Rp{{ number_format($d['target'], 0, ',', '.') }}</td>
+                            <td class="right">Rp{{ number_format($d['realisasi'], 0, ',', '.') }}</td>
                             <td class="center {{ $capClass($d['capaian']) }}">{{ $d['capaian'] }}%</td>
                         </tr>
                     @endforeach
@@ -267,7 +269,7 @@
         @endforeach
     @endforeach
 @empty
-    <p style="text-align:center; color:#9ca3af; padding:30px;">Tidak ada data untuk tahun {{ $tahun }}</p>
+    <p style="text-align:center; color:#000000; padding:30px;">Tidak ada data untuk tahun {{ $tahun }}</p>
 @endforelse
 
 <div class="footer">

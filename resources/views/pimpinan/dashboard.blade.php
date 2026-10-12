@@ -99,6 +99,8 @@ window.DASHBOARD_DATA = {
     role: 'pimpinan',
     routes: {
         data: @json(route('pimpinan.dashboard.data')),
+        exportPdf: @json(route('pimpinan.laporan.export.pdf')),
+        exportCsv: @json(route('pimpinan.laporan.export.csv')),
     },
     csrf: @json(csrf_token()),
 };

@@ -66,12 +66,15 @@
 <div id="progress-pengadaan-container" class="mb-6"></div>
 
 <script>
+<script>
 window.DASHBOARD_DATA = {
     initialTahun: @json($tahun),
     tahunBerjalan: @json($tahunBerjalan),
-    role: 'viewer',
+    role: 'pimpinan',
     routes: {
-        data: @json(route('viewer.dashboard.data')),
+        data: @json(route('pimpinan.dashboard.data')),
+        exportPdf: @json(route('pimpinan.laporan.export.pdf')),
+        exportCsv: @json(route('pimpinan.laporan.export.csv')),
     },
     csrf: @json(csrf_token()),
 };

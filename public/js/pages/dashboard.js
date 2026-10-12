@@ -715,8 +715,69 @@
         loadData();
     };
 
-    window.exportLaporan = function (format) {
-        toastInfo('Fitur export sedang disiapkan');
+        window.exportLaporan = function (format) {
+        // Validasi route
+        if (!DATA.routes.exportPdf || !DATA.routes.exportCsv) {
+            toastError('Route export belum tersedia');
+            console.error('[Dashboard] Route export tidak ditemukan di window.DASHBOARD_DATA.routes');
+            return;
+        }
+
+        // Tentukan URL berdasarkan format
+        const url = format === 'PDF'
+            ? `${DATA.routes.exportPdf}?tahun=${currentTahun}`
+            : `${DATA.routes.exportCsv}?tahun=${currentTahun}`;
+
+        // Tampilkan loading
+        Swal.fire({
+            title: `Menyiapkan ${format}...`,
+            html: `<p class="text-sm text-gray-500">Mohon tunggu, file sedang dibuat.</p>`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rounded-2xl' },
+        });
+
+        // Fetch & download
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': format === 'PDF' ? 'application/pdf' : 'text/csv',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(async (res) => {
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+
+            // Ambil filename dari header Content-Disposition
+            const disposition = res.headers.get('Content-Disposition') || '';
+            let filename = `laporan-${currentTahun}.${format.toLowerCase()}`;
+            const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (match && match[1]) {
+                filename = match[1].replace(/['"]/g, '');
+            }
+
+            // Konversi ke blob & trigger download
+            const blob = await res.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            Swal.close();
+            toastSuccess(`${format} berhasil diunduh`);
+        })
+        .catch((err) => {
+            Swal.close();
+            console.error('[Export]', err);
+            toastError(`Gagal export ${format}. Cek console untuk detail.`);
+        });
     };
 
     document.addEventListener('DOMContentLoaded', loadData);
