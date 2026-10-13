@@ -94,6 +94,10 @@ class PengadaanService
             'selesai' => (bool) $t->selesai,
             'tanggal_selesai' => $t->tanggal_selesai?->format('Y-m-d'),
             'kendala' => $t->kendala,
+            'dampak' => $t->dampak,                                  // ⬅️ TAMBAH
+            'tindak_lanjut' => $t->tindak_lanjut,                    // ⬅️ TAMBAH
+            'kendala_selesai' => (bool) $t->kendala_selesai,         // ⬅️ TAMBAH
+            'kendala_selesai_at' => $t->kendala_selesai_at?->format('Y-m-d'),  // ⬅️ TAMBAH
         ];
     }
 
@@ -193,9 +197,10 @@ class PengadaanService
             'selesai' => $data['selesai'] ?? $tahapan->selesai,
             'tanggal_selesai' => $data['tanggal_selesai'] ?? null,
             'kendala' => $data['kendala'] ?? null,
+            'dampak' => $data['dampak'] ?? null,                     // ⬅️ TAMBAH
+            'tindak_lanjut' => $data['tindak_lanjut'] ?? null,       // ⬅️ TAMBAH
         ]);
 
-        // Auto-set tanggal_selesai kalau centang selesai & tanggal kosong
         if ($tahapan->selesai && !$tahapan->tanggal_selesai) {
             $tahapan->update(['tanggal_selesai' => now()->format('Y-m-d')]);
         }

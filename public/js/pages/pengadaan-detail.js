@@ -219,9 +219,32 @@
                         </div>
 
                         ${t.kendala ? `
-                            <div class="kendala-badge mt-1.5">
-                                <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                <span>${t.kendala}</span>
+                            <div class="mt-2 p-2.5 rounded-lg border ${t.kendala_selesai ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-start gap-2 flex-1 min-w-0">
+                                        <i data-lucide="${t.kendala_selesai ? 'check-circle' : 'alert-triangle'}" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${t.kendala_selesai ? 'text-green-600' : 'text-amber-600'}"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[11px] font-semibold ${t.kendala_selesai ? 'text-green-900' : 'text-amber-900'}">
+                                                ${t.kendala_selesai ? 'Kendala Sudah Diatasi' : 'Kendala'}
+                                            </p>
+                                            <p class="text-[11px] ${t.kendala_selesai ? 'text-green-800 line-through' : 'text-amber-800'} mt-0.5">
+                                                ${t.kendala}
+                                            </p>
+                                            ${t.kendala_selesai && t.kendala_selesai_at ? `
+                                                <p class="text-[10px] text-green-700 mt-1 flex items-center gap-1">
+                                                    <i data-lucide="calendar-check" class="w-3 h-3"></i>
+                                                    Diatasi: ${formatTanggal(t.kendala_selesai_at)}
+                                                </p>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <button type="button"
+                                        onclick="event.stopPropagation(); toggleKendala(${t.id})"
+                                        class="flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-md transition ${t.kendala_selesai ? 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200' : 'bg-white text-green-700 hover:bg-green-50 border border-green-200'}"
+                                        title="${t.kendala_selesai ? 'Batal tandai' : 'Tandai sudah diatasi'}">
+                                        ${t.kendala_selesai ? '↺ Aktifkan' : 'Diatasi'}
+                                    </button>
+                                </div>
                             </div>
                         ` : ''}
                     </div>
@@ -309,9 +332,18 @@
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Kendala (opsional)</label>
-                <textarea id="f-tahapan-kendala" rows="3" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                <textarea id="f-tahapan-kendala" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     placeholder="Contoh: Vendor tidak memenuhi syarat">${t && t.kendala ? t.kendala : ''}</textarea>
-                <p class="text-[10px] text-gray-500 mt-1">Isi jika ada kendala pada tahapan ini.</p>
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Dampak Potensial (opsional)</label>
+                <textarea id="f-tahapan-dampak" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: Jadwal pengadaan mundur">${t && t.dampak ? t.dampak : ''}</textarea>
+            </div>
+            <div>
+                <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tindak Lanjut / Mitigasi (opsional)</label>
+                <textarea id="f-tahapan-tindak" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh: Percepat pengumuman ulang">${t && t.tindak_lanjut ? t.tindak_lanjut : ''}</textarea>
             </div>
             ${t ? `
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -319,7 +351,7 @@
                         <input type="checkbox" id="f-tahapan-selesai" ${t.selesai ? 'checked' : ''}
                             class="mt-0.5 w-4 h-4 rounded border-gray-300 text-green-600" />
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Tandai sebagai selesai</p>
+                            <p class="text-sm font-semibold text-gray-800">Tandai tahapan sebagai selesai</p>
                             <p class="text-xs text-gray-500 mt-0.5">Tanggal selesai otomatis diisi hari ini.</p>
                         </div>
                     </label>
@@ -332,6 +364,22 @@
         const data = {
             nama: document.getElementById('f-tahapan-nama').value.trim(),
             kendala: document.getElementById('f-tahapan-kendala').value.trim() || null,
+            dampak: document.getElementById('f-tahapan-dampak').value.trim() || null,
+            tindak_lanjut: document.getElementById('f-tahapan-tindak').value.trim() || null,
+        };
+        const selesaiEl = document.getElementById('f-tahapan-selesai');
+        if (selesaiEl) {
+            data.selesai = selesaiEl.checked;
+        }
+        return data;
+    }
+
+    function collectTahapanForm() {
+        const data = {
+            nama: document.getElementById('f-tahapan-nama').value.trim(),
+            kendala: document.getElementById('f-tahapan-kendala').value.trim() || null,
+            dampak: document.getElementById('f-tahapan-dampak').value.trim() || null,
+            tindak_lanjut: document.getElementById('f-tahapan-tindak').value.trim() || null,
         };
         const selesaiEl = document.getElementById('f-tahapan-selesai');
         if (selesaiEl) {
@@ -421,6 +469,23 @@
                 toastError(Array.isArray(first) ? first[0] : (res.data.message || 'Gagal menyimpan'));
             }
         });
+    };
+
+    // ============================================================
+    // TOGGLE KENDALA (SUDAH DIATASI / BELUM)
+    // ============================================================
+    window.toggleKendala = async function (tahapanId) {
+        const url = buildRoute(DATA.routes.toggleKendala, tahapanId, '__TID__');
+
+        const res = await apiCall('PATCH', url);
+
+        if (res.ok) {
+            pengadaan = res.data.pengadaan;
+            toastSuccess(res.data.message);
+            renderTahapan();
+        } else {
+            toastError(res.data.message || 'Gagal toggle kendala');
+        }
     };
 
     document.addEventListener('DOMContentLoaded', loadData);

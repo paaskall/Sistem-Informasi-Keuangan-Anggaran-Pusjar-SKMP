@@ -44,6 +44,7 @@ window.PENGADAAN_DETAIL_DATA = {
         toggleTahapan: @json(route('keuangan.pengadaan.tahapan.toggle', ['tahapanId' => '__TID__'])),
         destroyTahapan: @json(route('keuangan.pengadaan.tahapan.destroy', ['tahapanId' => '__TID__'])),
         reorderTahapan: @json(route('keuangan.pengadaan.tahapan.reorder', ['tahapanId' => '__TID__'])),
+        toggleKendala: @json(route('keuangan.pengadaan.tahapan.toggle-kendala', ['tahapanId' => '__TID__'])),
     },
     csrf: @json(csrf_token()),
 };

@@ -39,6 +39,7 @@
             ['section' => 'Pelaporan', 'icon' => 'file-spreadsheet', 'items' => [
                 ['url' => route('keuangan.pnbp'), 'icon' => 'receipt', 'label' => 'PNBP'],
                 ['url' => route('keuangan.laporan'), 'icon' => 'file-text', 'label' => 'Laporan'],
+                ['url' => route('keuangan.akselerasi'), 'icon' => 'zap', 'label' => 'Akselerasi'], 
             ]],
         ],
         'pimpinan' => [
@@ -73,9 +74,9 @@
     <img src="{{ asset('assets/logo-lanri.png') }}" alt="SIKAP"
          class="w-10 h-10 object-contain rounded-lg flex-shrink-0" />
     <div class="min-w-0">
-        <h3 class="text-body-lg font-bold text-brand-primary leading-tight tracking-wide">SIKAP</h3>
+        <h3 class="text-body-lg font-bold text-brand-primary leading-tight tracking-wide">LAN RI</h3>
         <p class="text-caption text-muted tracking-wide leading-tight mt-0.5">
-            Sistem Informasi Keuangan &amp; Anggaran<br/>Pusjar SKMP
+            Makarti Bhakti Nagari
         </p>
     </div>
 </div>

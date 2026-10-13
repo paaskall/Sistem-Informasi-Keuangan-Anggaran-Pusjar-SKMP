@@ -56,7 +56,13 @@
         </table>
     </div>
 </x-ui.card>
+@endsection
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/pages/target.css') }}?v={{ filemtime(public_path('css/pages/target.css')) }}">
+@endpush
+
+@push('scripts')
 <script>
 window.TARGET_DATA = {
     initialTahun: @json($tahun),
@@ -68,12 +74,5 @@ window.TARGET_DATA = {
     csrf: @json(csrf_token()),
 };
 </script>
-@endsection
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/pages/target.css') }}?v={{ filemtime(public_path('css/pages/target.css')) }}">
-@endpush
-
-@push('scripts')
 <script src="{{ asset('js/pages/target-viewer.js') }}?v={{ filemtime(public_path('js/pages/target-viewer.js')) }}"></script>
 @endpush

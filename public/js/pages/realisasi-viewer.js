@@ -119,11 +119,11 @@
                                         </div>
                                         <div class="min-w-0">
                                             <p class="text-xs font-medium text-gray-800 truncate">${kom ? kom.nama : '-'}</p>
-                                            <p class="text-[9px] text-gray-400 font-mono">${kom ? kom.kode : '-'}</p>
+                                            <p class="text-[9px] text-gray-400">${kom ? kom.kode : '-'}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-2.5 px-3 text-right font-mono text-xs font-semibold text-emerald-700 whitespace-nowrap">${rp(d.nominal)}</td>
+                                <td class="py-2.5 px-3 text-right text-xs font-semibold text-emerald-700 whitespace-nowrap">${rp(d.nominal)}</td>
                                 <td class="py-2.5 pl-3 pr-4 text-right text-[10px] text-gray-500 w-16">${pct}%</td>
                             </tr>`;
                     }).join('');
@@ -221,7 +221,7 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div>
-                            <span class="font-mono font-bold text-emerald-700 whitespace-nowrap">${rp(r.nominal)}</span>
+                            <span class="font-bold text-emerald-700 whitespace-nowrap">${rp(r.nominal)}</span>
                             <p class="text-[10px] text-gray-500 mt-0.5">Capaian: ${cap}%</p>
                         </div>
                     </td>

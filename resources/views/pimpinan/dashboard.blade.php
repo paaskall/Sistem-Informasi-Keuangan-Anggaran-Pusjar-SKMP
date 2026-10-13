@@ -33,6 +33,9 @@
     </div>
 </div>
 
+{{-- MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA) --}}
+<div id="catatan-kendala-container" class="mb-6"></div>
+
 {{-- CHART BULANAN --}}
 <x-ui.card padding="p-0" class="mb-6">
     <div class="bg-gradient-to-r from-gray-50 to-blue-50/50 border-b border-gray-100 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
@@ -66,8 +69,17 @@
 {{-- PROGRESS PENGADAAN --}}
 <div id="progress-pengadaan-container" class="mb-6"></div>
 
+{{-- RENCANA PENGADAAN --}}
+<div id="rencana-pengadaan-container" class="mb-6"></div>
+
+{{-- KENDALA DALAM PENGADAAN --}}
+<div id="kendala-pengadaan-container" class="mb-6"></div>
+
 {{-- RENCANA REALISASI BULAN INI --}}
 <div id="rencana-bulan-ini-container" class="mb-6"></div>
+
+{{-- AKSELERASI PENYERAPAN ANGGARAN --}}
+<div id="akselerasi-container" class="mb-6"></div>
 
 {{-- AKSI CEPAT --}}
 <x-ui.card>

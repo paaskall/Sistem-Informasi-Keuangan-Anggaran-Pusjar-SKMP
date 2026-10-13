@@ -32,6 +32,9 @@
     </div>
 </div>
 
+{{-- MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA) --}}
+<div id="catatan-kendala-container" class="mb-6"></div>
+
 {{-- CHART BULANAN --}}
 <x-ui.card padding="p-0" class="mb-6">
     <div class="bg-gradient-to-r from-gray-50 to-blue-50/50 border-b border-gray-100 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
@@ -65,22 +68,30 @@
 {{-- PROGRESS PENGADAAN --}}
 <div id="progress-pengadaan-container" class="mb-6"></div>
 
-<script>
+{{-- RENCANA PENGADAAN --}}
+<div id="rencana-pengadaan-container" class="mb-6"></div>
+
+{{-- KENDALA DALAM PENGADAAN --}}
+<div id="kendala-pengadaan-container" class="mb-6"></div>
+
+{{-- AKSELERASI PENYERAPAN ANGGARAN --}}
+<div id="akselerasi-container" class="mb-6"></div>
+
+@endsection
+
+@push('scripts')
+{{-- ⬇️ DATA DULU ⬇️ --}}
 <script>
 window.DASHBOARD_DATA = {
     initialTahun: @json($tahun),
     tahunBerjalan: @json($tahunBerjalan),
-    role: 'pimpinan',
+    role: 'viewer',
     routes: {
-        data: @json(route('pimpinan.dashboard.data')),
-        exportPdf: @json(route('pimpinan.laporan.export.pdf')),
-        exportCsv: @json(route('pimpinan.laporan.export.csv')),
+        data: @json(route('viewer.dashboard.data')),
     },
     csrf: @json(csrf_token()),
 };
 </script>
-@endsection
-
-@push('scripts')
+{{-- ⬇️ BARU SCRIPT ⬇️ --}}
 <script src="{{ asset('js/pages/dashboard.js') }}?v={{ filemtime(public_path('js/pages/dashboard.js')) }}"></script>
 @endpush

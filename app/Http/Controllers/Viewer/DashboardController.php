@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Viewer;
 use App\Helpers\TahunHelper;
 use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
-use App\Services\TargetService;
-use App\Services\RealisasiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,9 +12,7 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     public function __construct(
-        protected DashboardService $service,
-        protected TargetService $targetService,
-        protected RealisasiService $realisasiService
+        protected DashboardService $service
     ) {}
 
     public function index(Request $request): View
@@ -41,13 +37,17 @@ class DashboardController extends Controller
             'ok' => true,
             'tahun' => $tahun,
             'editable' => false,
-            'tahun_berjalan' => \App\Helpers\TahunHelper::tahunBerjalan(),
+            'tahun_berjalan' => TahunHelper::tahunBerjalan(),
             'stats' => $this->service->getStats($tahun),
             'per_bulan' => $this->service->getPerBulan($tahun),
-            'pnbp_summary' => $this->service->getPnbpSummary($tahun),
             'progress_pengadaan' => $this->service->getProgressPengadaan(3),
-            'rencana_bulan_ini' => $this->service->getRencanaRealisasiBulanIni($tahun),
-            'bulan_ini' => $this->service->getBulanIni($tahun),
+            'pnbp_summary' => $this->service->getPnbpSummary($tahun),
+
+            // 3 SECTION BARU
+            'catatan_kendala' => $this->service->getCatatanKendala($tahun),
+            'akselerasi' => $this->service->getAkselerasi($tahun),
+            'kendala_pengadaan' => $this->service->getKendalaPengadaan($tahun),
+            'rencana_pengadaan' => $this->service->getRencanaPengadaan($tahun),
         ]);
     }
 }

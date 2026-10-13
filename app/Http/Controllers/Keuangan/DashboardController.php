@@ -42,7 +42,13 @@ class DashboardController extends Controller
             'per_bulan' => $this->service->getPerBulan($tahun),
             'rencana_bulan_ini' => $this->service->getRencanaRealisasiBulanIni($tahun),
             'progress_pengadaan' => $this->service->getProgressPengadaan(3),
-            'pnbp_summary' => $this->service->getPnbpSummary($tahun), // ⭐ TAMBAH
+            'pnbp_summary' => $this->service->getPnbpSummary($tahun),
+
+            // 3 SECTION BARU
+            'catatan_kendala' => $this->service->getCatatanKendala($tahun),
+            'akselerasi' => $this->service->getAkselerasi($tahun),
+            'kendala_pengadaan' => $this->service->getKendalaPengadaan($tahun),
+            'rencana_pengadaan' => $this->service->getRencanaPengadaan($tahun),
         ]);
     }
 }

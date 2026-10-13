@@ -25,6 +25,7 @@ use App\Http\Controllers\Viewer\PengadaanController as ViewerPengadaanController
 use App\Http\Controllers\Keuangan\PnbpController;
 use App\Http\Controllers\Pimpinan\PnbpController as PimpinanPnbpController;
 use App\Http\Controllers\Viewer\PnbpController as ViewerPnbpController;
+use App\Http\Controllers\Keuangan\AkselerasiController;
 
 // ============================================================
 // AUTH ROUTES (guest)
@@ -132,7 +133,7 @@ Route::prefix('keuangan')
         Route::get('/laporan/data', [KeuanganLaporanController::class, 'data'])->name('laporan.data');
         Route::get('/laporan/export/pdf', [KeuanganLaporanController::class, 'exportPdf'])->name('laporan.export.pdf');
         Route::get('/laporan/export/csv', [KeuanganLaporanController::class, 'exportCsv'])->name('laporan.export.csv');
-    
+
         // Pengadaan
         Route::get('/pengadaan', [PengadaanController::class, 'index'])->name('pengadaan');
         Route::get('/pengadaan/data', [PengadaanController::class, 'data'])->name('pengadaan.data');
@@ -141,6 +142,7 @@ Route::prefix('keuangan')
         Route::get('/pengadaan/{id}/data', [PengadaanController::class, 'detailData'])->name('pengadaan.detail-data');
         Route::put('/pengadaan/{id}', [PengadaanController::class, 'update'])->name('pengadaan.update');
         Route::delete('/pengadaan/{id}', [PengadaanController::class, 'destroy'])->name('pengadaan.destroy');
+        Route::patch('/pengadaan/tahapan/{tahapanId}/toggle-kendala', [PengadaanController::class, 'toggleKendala'])->name('pengadaan.tahapan.toggle-kendala');
 
         // Tahapan
         Route::post('/pengadaan/{pengadaanId}/tahapan', [PengadaanController::class, 'storeTahapan'])->name('pengadaan.tahapan.store');
@@ -156,7 +158,14 @@ Route::prefix('keuangan')
         Route::put('/pnbp/detail/{detailId}', [PnbpController::class, 'updateDetail'])->name('pnbp.detail.update');
         Route::delete('/pnbp/detail/{detailId}', [PnbpController::class, 'destroyDetail'])->name('pnbp.detail.destroy');
         Route::delete('/pnbp/{id}', [PnbpController::class, 'destroy'])->name('pnbp.destroy');
-    }); 
+
+        // Akselerasi Penyerapan
+        Route::get('/akselerasi', [AkselerasiController::class, 'index'])->name('akselerasi');
+        Route::get('/akselerasi/data', [AkselerasiController::class, 'data'])->name('akselerasi.data');
+        Route::post('/akselerasi', [AkselerasiController::class, 'store'])->name('akselerasi.store');
+        Route::put('/akselerasi/{id}', [AkselerasiController::class, 'update'])->name('akselerasi.update');
+        Route::delete('/akselerasi/{id}', [AkselerasiController::class, 'destroy'])->name('akselerasi.destroy');
+    });
 
 // ============================================================
 // PIMPINAN
@@ -185,13 +194,13 @@ Route::prefix('pimpinan')
         Route::get('/pengadaan/data', [PimpinanPengadaanController::class, 'data'])->name('pengadaan.data');
         Route::get('/pengadaan/{id}', [PimpinanPengadaanController::class, 'detail'])->name('pengadaan.detail');
         Route::get('/pengadaan/{id}/data', [PimpinanPengadaanController::class, 'detailData'])->name('pengadaan.detail-data');
-    
+
         // PNBP (read-only)
         Route::get('/pnbp', [PimpinanPnbpController::class, 'index'])->name('pnbp');
         Route::get('/pnbp/data', [PimpinanPnbpController::class, 'data'])->name('pnbp.data');
     });
 
-    // ============================================================
+// ============================================================
 // VIEWER (read-only)
 // ============================================================
 Route::prefix('viewer')

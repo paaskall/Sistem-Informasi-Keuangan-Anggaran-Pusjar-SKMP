@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-    <x-ui.page-title 
-        title="Dashboard Keuangan" 
+    <x-ui.page-title
+        title="Dashboard Keuangan"
         subtitle="Ringkasan keuangan tahun {{ $tahun }}"
     />
     <div class="flex gap-2 items-center">
@@ -13,7 +13,7 @@
             class="h-11 px-3 rounded-md text-body border border-gray-200 focus:border-brand-secondary focus:ring-2 focus:ring-blue-100 bg-white">
             @foreach ($tahunOptions as $y)
                 <option value="{{ $y }}" {{ $y === $tahun ? 'selected' : '' }}>
-                    {{ $y }}{{ $y != $tahunBerjalan ? ' 🔒' : '' }}
+                    {{ $y }}{{ $y != $tahunBerjalan ? '' : '' }}
                 </option>
             @endforeach
         </select>
@@ -22,8 +22,7 @@
 
 {{-- BANNER ARSIP --}}
 <div id="arsip-banner" class="hidden mb-4">
-    <x-ui.alert variant="warning" title="Mode Arsip - Read Only" dismissible>
-        Data tahun <span id="arsip-tahun" class="font-bold">-</span> sudah dikunci. Anda hanya bisa melihat, tidak bisa mengubah.
+    <x-ui.alert variant="warning" title="Read Only" dismissible>
     </x-ui.alert>
 </div>
 
@@ -36,6 +35,9 @@
         <div class="text-center py-10 text-muted text-label">Memuat...</div>
     </div>
 </div>
+
+{{-- MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA) --}}
+<div id="catatan-kendala-container" class="mb-6"></div>
 
 {{-- CHART BULANAN --}}
 <x-ui.card padding="p-0" class="mb-6">
@@ -70,11 +72,20 @@
 {{-- PROGRESS PENGADAAN --}}
 <div id="progress-pengadaan-container" class="mb-6"></div>
 
+{{-- RENCANA PENGADAAN --}}
+<div id="rencana-pengadaan-container" class="mb-6"></div>
+
+{{-- KENDALA DALAM PENGADAAN --}}
+<div id="kendala-pengadaan-container" class="mb-6"></div>
+
 {{-- RENCANA REALISASI BULAN INI --}}
 <div id="rencana-bulan-ini-container" class="mb-6"></div>
 
 {{-- HIGHLIGHT BULAN INI --}}
 <div id="bulan-ini-container"></div>
+
+{{-- AKSELERASI PENYERAPAN ANGGARAN --}}
+<div id="akselerasi-container" class="mb-6"></div>
 
 {{-- AKSI CEPAT --}}
 <x-ui.card>
@@ -114,5 +125,5 @@ window.DASHBOARD_DATA = {
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/pages/dashboard.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/pages/dashboard.js') }}?v={{ filemtime(public_path('js/pages/dashboard.js')) }}"></script>
 @endpush

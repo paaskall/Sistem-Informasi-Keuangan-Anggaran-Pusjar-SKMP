@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pimpinan;
 
+use App\Helpers\TahunHelper;
 use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,7 @@ class DashboardController extends Controller
         return view('pimpinan.dashboard', [
             'tahun' => $tahun,
             'tahunOptions' => [2026, 2025, 2024],
-            'tahunBerjalan' => \App\Helpers\TahunHelper::tahunBerjalan(),
+            'tahunBerjalan' => TahunHelper::tahunBerjalan(),
         ]);
     }
 
@@ -35,12 +36,19 @@ class DashboardController extends Controller
         return response()->json([
             'ok' => true,
             'tahun' => $tahun,
+            'editable' => false,
+            'tahun_berjalan' => TahunHelper::tahunBerjalan(),
             'stats' => $this->service->getStats($tahun),
             'per_bulan' => $this->service->getPerBulan($tahun),
-            'ringkasan_modul' => $this->service->getRingkasanModul(),
             'rencana_bulan_ini' => $this->service->getRencanaRealisasiBulanIni($tahun),
             'progress_pengadaan' => $this->service->getProgressPengadaan(3),
-            'pnbp_summary' => $this->service->getPnbpSummary($tahun), // ⭐ TAMBAH
+            'pnbp_summary' => $this->service->getPnbpSummary($tahun),
+
+            // 3 SECTION BARU
+            'catatan_kendala' => $this->service->getCatatanKendala($tahun),
+            'akselerasi' => $this->service->getAkselerasi($tahun),
+            'kendala_pengadaan' => $this->service->getKendalaPengadaan($tahun),
+            'rencana_pengadaan' => $this->service->getRencanaPengadaan($tahun),
         ]);
     }
 }

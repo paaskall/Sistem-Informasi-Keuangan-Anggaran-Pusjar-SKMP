@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePengadaanRequest;
-use App\Http\Requests\StorePengadaanTahapanRequest;
 use App\Models\JenisPengadaan;
 use App\Models\Pengadaan;
 use App\Models\PengadaanTahapan;
@@ -19,17 +18,11 @@ class PengadaanController extends Controller
         protected PengadaanService $service
     ) {}
 
-    /**
-     * Halaman list pengadaan.
-     */
     public function index(): View
     {
         return view('keuangan.pengadaan');
     }
 
-    /**
-     * Halaman detail pengadaan.
-     */
     public function detail(int $id): View
     {
         $pengadaan = Pengadaan::with(['jenisPengadaan', 'status', 'tahapans'])->findOrFail($id);
@@ -39,16 +32,12 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Data list pengadaan (AJAX).
-     */
     public function data(Request $request): JsonResponse
     {
         $tahun = $request->filled('tahun') ? (int) $request->tahun : null;
 
         $pengadaans = $this->service->getAll($tahun);
 
-        // Stats
         $all = Pengadaan::all();
         $stats = [
             'total' => $all->count(),
@@ -67,9 +56,6 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Data detail pengadaan (AJAX).
-     */
     public function detailData(int $id): JsonResponse
     {
         $pengadaan = Pengadaan::with(['jenisPengadaan', 'status', 'tahapans'])->findOrFail($id);
@@ -80,9 +66,6 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Simpan pengadaan baru.
-     */
     public function store(StorePengadaanRequest $request): JsonResponse
     {
         $pengadaan = $this->service->create($request->validated());
@@ -94,9 +77,6 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Update pengadaan.
-     */
     public function update(StorePengadaanRequest $request, int $id): JsonResponse
     {
         $pengadaan = Pengadaan::findOrFail($id);
@@ -109,9 +89,6 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Hapus pengadaan.
-     */
     public function destroy(int $id): JsonResponse
     {
         $pengadaan = Pengadaan::findOrFail($id);
@@ -127,57 +104,147 @@ class PengadaanController extends Controller
     // TAHAPAN
     // ============================================================
 
-    /**
-     * Tambah tahapan.
-     */
-    public function storeTahapan(StorePengadaanTahapanRequest $request, int $pengadaanId): JsonResponse
+    public function storeTahapan(Request $request, int $pengadaanId): JsonResponse
     {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'kendala' => 'nullable|string',
+            'dampak' => 'nullable|string',
+            'tindak_lanjut' => 'nullable|string',
+            'selesai' => 'nullable|boolean',
+        ]);
+
         $pengadaan = Pengadaan::findOrFail($pengadaanId);
-        $tahapan = $this->service->addTahapan($pengadaan, $request->validated());
+
+        $urutan = ($pengadaan->tahapans()->max('urutan') ?? 0) + 1;
+
+        $pengadaan->tahapans()->create([
+            'nama' => $validated['nama'],
+            'urutan' => $urutan,
+            'kendala' => $validated['kendala'] ?? null,
+            'dampak' => $validated['dampak'] ?? null,
+            'tindak_lanjut' => $validated['tindak_lanjut'] ?? null,
+            'selesai' => $validated['selesai'] ?? false,
+            'tanggal_selesai' => ($validated['selesai'] ?? false) ? now() : null,
+        ]);
+
+        $pengadaan->recalculate();
+        $pengadaan->refresh();
 
         return response()->json([
             'ok' => true,
-            'message' => 'Tahapan berhasil ditambahkan.',
-            'tahapan' => $this->service->transformTahapan($tahapan),
-            'pengadaan' => $this->service->transform($pengadaan->fresh(['tahapans', 'jenisPengadaan', 'status'])),
+            'message' => 'Tahapan berhasil ditambahkan',
+            'pengadaan' => $this->service->transform($pengadaan),
         ]);
     }
 
-    /**
-     * Update tahapan.
-     */
-    public function updateTahapan(StorePengadaanTahapanRequest $request, int $tahapanId): JsonResponse
+    public function updateTahapan(Request $request, int $tahapanId): JsonResponse
     {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'kendala' => 'nullable|string',
+            'dampak' => 'nullable|string',
+            'tindak_lanjut' => 'nullable|string',
+            'selesai' => 'nullable|boolean',
+        ]);
+
         $tahapan = PengadaanTahapan::findOrFail($tahapanId);
-        $tahapan = $this->service->updateTahapan($tahapan, $request->validated());
+
+        $tahapan->update([
+            'nama' => $validated['nama'],
+            'kendala' => $validated['kendala'] ?? null,
+            'dampak' => $validated['dampak'] ?? null,
+            'tindak_lanjut' => $validated['tindak_lanjut'] ?? null,
+            'selesai' => $validated['selesai'] ?? false,
+            'tanggal_selesai' => ($validated['selesai'] ?? false) ? now() : null,
+        ]);
+
+        $pengadaan = $tahapan->pengadaan;
+        $pengadaan->recalculate();
+        $pengadaan->refresh();
 
         return response()->json([
             'ok' => true,
-            'message' => 'Tahapan berhasil diupdate.',
-            'tahapan' => $this->service->transformTahapan($tahapan),
-            'pengadaan' => $this->service->transform($tahapan->pengadaan->fresh(['tahapans', 'jenisPengadaan', 'status'])),
+            'message' => 'Tahapan berhasil diupdate',
+            'pengadaan' => $this->service->transform($pengadaan),
         ]);
     }
 
-    /**
-     * Toggle selesai tahapan.
-     */
     public function toggleTahapan(int $tahapanId): JsonResponse
     {
-        $tahapan = PengadaanTahapan::findOrFail($tahapanId);
-        $tahapan = $this->service->toggleTahapan($tahapan);
+        try {
+            $tahapan = PengadaanTahapan::findOrFail($tahapanId);
 
-        return response()->json([
-            'ok' => true,
-            'message' => $tahapan->selesai ? 'Tahapan ditandai selesai.' : 'Tahapan ditandai belum selesai.',
-            'tahapan' => $this->service->transformTahapan($tahapan),
-            'pengadaan' => $this->service->transform($tahapan->pengadaan->fresh(['tahapans', 'jenisPengadaan', 'status'])),
-        ]);
+            $tahapan->selesai = !$tahapan->selesai;
+            $tahapan->tanggal_selesai = $tahapan->selesai ? now() : null;
+            $tahapan->save();
+
+            $pengadaan = $tahapan->pengadaan;
+            $pengadaan->recalculate();
+            $pengadaan->refresh();
+
+            return response()->json([
+                'ok' => true,
+                'message' => $tahapan->selesai ? 'Tahapan ditandai selesai.' : 'Tahapan ditandai belum selesai.',
+                'pengadaan' => $this->service->transform($pengadaan),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[Toggle Tahapan] ' . $e->getMessage(), [
+                'tahapan_id' => $tahapanId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Hapus tahapan.
+     * Toggle kendala sudah diatasi / belum.
      */
+    public function toggleKendala(int $tahapanId): JsonResponse
+    {
+        try {
+            $tahapan = PengadaanTahapan::findOrFail($tahapanId);
+
+            if (!$tahapan->kendala) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Tahapan ini tidak memiliki kendala.',
+                ], 422);
+            }
+
+            $tahapan->kendala_selesai = !$tahapan->kendala_selesai;
+            $tahapan->kendala_selesai_at = $tahapan->kendala_selesai ? now() : null;
+            $tahapan->save();
+
+            $pengadaan = $tahapan->pengadaan;
+            $pengadaan->refresh();
+
+            return response()->json([
+                'ok' => true,
+                'message' => $tahapan->kendala_selesai
+                    ? 'Kendala ditandai sudah diatasi.'
+                    : 'Kendala ditandai aktif kembali.',
+                'pengadaan' => $this->service->transform($pengadaan),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[Toggle Kendala] ' . $e->getMessage(), [
+                'tahapan_id' => $tahapanId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function destroyTahapan(int $tahapanId): JsonResponse
     {
         $tahapan = PengadaanTahapan::findOrFail($tahapanId);
@@ -192,9 +259,6 @@ class PengadaanController extends Controller
         ]);
     }
 
-    /**
-     * Reorder tahapan (naik/turun).
-     */
     public function reorderTahapan(Request $request, int $tahapanId): JsonResponse
     {
         $request->validate([

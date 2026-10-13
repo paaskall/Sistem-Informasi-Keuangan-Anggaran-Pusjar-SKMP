@@ -73,6 +73,13 @@
         renderChart(d.per_bulan);
         renderProgressPengadaan(d.progress_pengadaan);
         renderRencanaBulanIni(d.rencana_bulan_ini);
+
+        // 3 SECTION BARU
+        renderCatatanKendala(d.catatan_kendala);
+        renderAkselerasi(d.akselerasi);
+        renderKendalaPengadaan(d.kendala_pengadaan);
+        renderRencanaPengadaan(d.rencana_pengadaan);
+
         renderBulanIni(d.bulan_ini);
         if (d.ringkasan_modul) renderRingkasanModul(d.ringkasan_modul);
         updateArsipBanner();
@@ -83,6 +90,9 @@
         if (chTahun) chTahun.textContent = currentTahun;
     }
 
+    // ============================================================
+    // SUMMARY CARD (ANGGARAN)
+    // ============================================================
     function renderSummaryCard(s) {
         const container = document.getElementById('summary-card');
         if (!container) return;
@@ -176,6 +186,9 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // DONUT SVG BUILDER
+    // ============================================================
     function buildDonutSvg(progress, size = 130) {
         const strokeWidth = 14;
         const radius = (size - strokeWidth) / 2;
@@ -203,6 +216,9 @@
         `;
     }
 
+    // ============================================================
+    // PROGRESS PENGADAAN (DONUT)
+    // ============================================================
     function renderProgressPengadaan(items) {
         const container = document.getElementById('progress-pengadaan-container');
         if (!container) return;
@@ -268,6 +284,9 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // PNBP SUMMARY CARD
+    // ============================================================
     function renderPnbpSummary(data) {
         const container = document.getElementById('pnbp-summary-card');
         if (!container) return;
@@ -394,6 +413,9 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // CHART BULANAN
+    // ============================================================
     function renderChart(perBulan) {
         chartData = perBulan;
         const container = document.getElementById('chart-container');
@@ -508,6 +530,9 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // RENCANA REALISASI BULAN INI
+    // ============================================================
     function renderRencanaBulanIni(data) {
         const container = document.getElementById('rencana-bulan-ini-container');
         if (!container) return;
@@ -635,6 +660,271 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // MATRIKS MANAJEMEN RISIKO REALISASI ANGGARAN (3 KOLOM)
+    // ============================================================
+    function renderCatatanKendala(data) {
+        const container = document.getElementById('catatan-kendala-container');
+        if (!container) return;
+
+        if (!data || !data.items || data.items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const rowsHtml = data.items.map((item, idx) => {
+            // Warna badge per kategori
+            const katLower = (item.kategori || '').toLowerCase();
+            let katClass = 'bg-gray-100 text-gray-700';
+            if (katLower.includes('administrasi')) {
+                katClass = 'bg-purple-100 text-purple-700';
+            } else if (katLower.includes('pengadaan')) {
+                katClass = 'bg-blue-100 text-blue-700';
+            } else if (katLower.includes('keuangan') || katLower.includes('pembayaran')) {
+                katClass = 'bg-amber-100 text-amber-700';
+            } else if (katLower.includes('teknis')) {
+                katClass = 'bg-emerald-100 text-emerald-700';
+            }
+
+            return `
+                <tr class="border-b border-gray-100 last:border-0 hover:bg-red-50/30 transition">
+                    <td class="px-4 py-4 text-center align-top w-12">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 text-red-700 text-xs font-bold">
+                            ${idx + 1}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 align-top" style="width: 40%;">
+                        <p class="text-xs font-semibold text-gray-800 leading-snug mb-1.5">
+                            ${item.kendala}
+                        </p>
+                        <span class="inline-block text-[10px] font-bold ${katClass} px-2 py-0.5 rounded-full">
+                            ${item.kategori}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 align-top" style="width: 30%;">
+                        ${item.dampak ? `
+                            <p class="text-xs text-gray-700 leading-relaxed">${item.dampak}</p>
+                        ` : `
+                            <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                        `}
+                    </td>
+                    <td class="px-4 py-4 align-top" style="width: 30%;">
+                        ${item.tindak_lanjut ? `
+                            <p class="text-xs text-gray-700 leading-relaxed">${item.tindak_lanjut}</p>
+                        ` : `
+                            <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                        `}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border-2 border-red-200 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 flex items-center gap-3 border-b border-red-200/60">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-red-900">
+                            ${data.title || 'Matriks Manajemen Risiko Realisasi Anggaran'}
+                        </h3>
+                        <p class="text-[11px] text-red-700 mt-0.5">
+                            ${data.subtitle || 'Identifikasi kendala/risiko, dampak, dan mitigasi'}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-red-50/60 text-red-900 text-[10px] uppercase">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold text-center w-12">No</th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 40%;">
+                                    Kendala / Risiko
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Dampak Potensial
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Tindak Lanjut / Mitigasi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // AKSELERASI PENYERAPAN ANGGARAN
+    // ============================================================
+    function renderAkselerasi(data) {
+        const container = document.getElementById('akselerasi-container');
+        if (!container) return;
+
+        if (!data || !data.items || data.items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const itemsHtml = data.items.map((item, idx) => {
+            const pct = Math.min(Math.max(item.progress, 0), 100);
+            const barColor = pct >= 80 ? 'from-green-600 to-green-400'
+                            : pct >= 60 ? 'from-blue-600 to-blue-400'
+                            : pct >= 40 ? 'from-amber-500 to-amber-400'
+                            : 'from-red-500 to-red-400';
+            const pctColor = pct >= 80 ? 'text-green-700'
+                            : pct >= 60 ? 'text-blue-700'
+                            : pct >= 40 ? 'text-amber-700'
+                            : 'text-red-700';
+            const badgeBg = pct >= 80 ? 'bg-green-100'
+                            : pct >= 60 ? 'bg-blue-100'
+                            : pct >= 40 ? 'bg-amber-100'
+                            : 'bg-red-100';
+
+            return `
+                <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-white hover:bg-blue-50/30 transition-blueprint">
+                    <div class="w-10 h-10 rounded-xl ${badgeBg} flex items-center justify-center flex-shrink-0">
+                        <span class="text-sm font-bold ${pctColor}">${idx + 1}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-gray-800 leading-snug">${item.kegiatan}</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1">
+                                    <i data-lucide="calendar" class="w-3 h-3"></i>
+                                    ${item.jangka_waktu}
+                                </p>
+                            </div>
+                            <span class="text-lg font-bold ${pctColor} whitespace-nowrap">${pct}%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden mb-2">
+                            <div class="bg-gradient-to-r ${barColor} h-full rounded-full transition-all duration-700"
+                                style="width: ${pct}%"></div>
+                        </div>
+                        ${item.keterangan ? `
+                            <div class="flex items-start gap-1.5 text-[11px] text-gray-600">
+                                <i data-lucide="info" class="w-3 h-3 flex-shrink-0 mt-0.5 text-blue-500"></i>
+                                <span>${item.keterangan}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 flex items-center justify-between gap-3 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-200">
+                            <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800">
+                                ${data.title || 'Akselerasi Penyerapan Anggaran'}
+                            </h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Kegiatan percepatan pencapaian target anggaran</p>
+                        </div>
+                    </div>
+                    <a href="/keuangan/akselerasi"
+                        class="text-[11px] text-blue-700 hover:underline font-semibold flex items-center gap-1">
+                        Kelola <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <div class="p-4 space-y-2">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // RENCANA PENGADAAN
+    // ============================================================
+    function renderRencanaPengadaan(data) {
+        const container = document.getElementById('rencana-pengadaan-container');
+        if (!container) return;
+
+        if (!data || !data.items || data.items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const itemsHtml = data.items.map((item, idx) => {
+            const progressColor = item.progress >= 100 ? 'text-green-700 bg-green-100'
+                                : item.progress >= 70 ? 'text-blue-700 bg-blue-100'
+                                : item.progress >= 40 ? 'text-amber-700 bg-amber-100'
+                                : 'text-red-700 bg-red-100';
+
+            return `
+                <tr class="border-b border-gray-100 last:border-0 hover:bg-blue-50/30">
+                    <td class="px-3 py-2.5 text-center text-xs text-gray-500 font-semibold w-10">${idx + 1}</td>
+                    <td class="px-3 py-2.5">
+                        <p class="text-xs font-medium text-gray-800">${item.nama}</p>
+                        <p class="text-[10px] text-gray-400">${item.kode || ''}</p>
+                    </td>
+                    <td class="px-3 py-2.5 text-right text-xs text-gray-800 font-semibold whitespace-nowrap">${rp(item.anggaran)}</td>
+                    <td class="px-3 py-2.5 text-center text-[11px] text-gray-600 whitespace-nowrap">${item.waktu || '-'}</td>
+                    <td class="px-3 py-2.5 text-center">
+                        <span class="inline-block text-[10px] font-bold px-2 py-1 rounded ${progressColor} whitespace-nowrap">${item.progress}%</span>
+                    </td>
+                    <td class="px-3 py-2.5 text-center">
+                        <span class="text-[10px] text-gray-600">${item.keterangan || '-'}</span>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 flex items-center justify-between gap-3 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="shopping-cart" class="w-5 h-5 text-blue-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800">Rencana Pengadaan</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Rencana & progress paket pengadaan</p>
+                        </div>
+                    </div>
+                    <a href="/keuangan/pengadaan"
+                        class="text-[11px] text-blue-700 hover:underline font-semibold flex items-center gap-1">
+                        Lihat Semua <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-blue-50/60 text-blue-900 text-[10px] uppercase">
+                            <tr>
+                                <th class="px-3 py-2.5 font-semibold text-center w-10">No</th>
+                                <th class="px-3 py-2.5 font-semibold text-left">Jenis Pengadaan / Kontrak</th>
+                                <th class="px-3 py-2.5 font-semibold text-right w-28">Anggaran</th>
+                                <th class="px-3 py-2.5 font-semibold text-center w-32">Waktu Pelaksanaan</th>
+                                <th class="px-3 py-2.5 font-semibold text-center w-20">Progress</th>
+                                <th class="px-3 py-2.5 font-semibold text-center w-28">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // BULAN INI (HIGHLIGHT)
+    // ============================================================
     function renderBulanIni(b) {
         const container = document.getElementById('bulan-ini-container');
         if (!container) return;
@@ -669,6 +959,9 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // RINGKASAN MODUL
+    // ============================================================
     function renderRingkasanModul(r) {
         const container = document.getElementById('ringkasan-container');
         if (!container) return;
@@ -707,6 +1000,101 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // ============================================================
+    // KENDALA DALAM PENGADAAN (3 KOLOM)
+    // ============================================================
+    function renderKendalaPengadaan(data) {
+        const container = document.getElementById('kendala-pengadaan-container');
+        if (!container) return;
+
+        if (!data || !data.items || data.items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const rowsHtml = data.items.map((item, idx) => `
+            <tr class="border-b border-gray-100 last:border-0 hover:bg-red-50/30 transition">
+                <td class="px-4 py-4 text-center align-top w-12">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 text-red-700 text-xs font-bold">
+                        ${idx + 1}
+                    </span>
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 40%;">
+                    <p class="text-xs font-semibold text-gray-800 leading-snug mb-1.5">
+                        ${item.kendala}
+                    </p>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="inline-block text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            ${item.kategori}
+                        </span>
+                        ${item.pengadaan_kode && item.pengadaan_kode !== '-' ? `
+                            <span class="inline-block text-[10px] font-mono font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                ${item.pengadaan_kode}
+                            </span>
+                        ` : ''}
+                    </div>
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 30%;">
+                    ${item.dampak ? `
+                        <p class="text-xs text-gray-700 leading-relaxed">${item.dampak}</p>
+                    ` : `
+                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                    `}
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 30%;">
+                    ${item.tindak_lanjut ? `
+                        <p class="text-xs text-gray-700 leading-relaxed">${item.tindak_lanjut}</p>
+                    ` : `
+                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                    `}
+                </td>
+            </tr>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border-2 border-red-200 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 flex items-center gap-3 border-b border-red-200/60">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-red-900">
+                            ${data.title || 'Kendala dalam Pengadaan'}
+                        </h3>
+                        <p class="text-[11px] text-red-700 mt-0.5">
+                            ${data.subtitle || 'Kendala tahapan pengadaan, dampak, dan tindak lanjut'}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-red-50/60 text-red-900 text-[10px] uppercase">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold text-center w-12">No</th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 40%;">
+                                    Kendala / Risiko
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Dampak Potensial
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Tindak Lanjut / Mitigasi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // CHANGE TAHUN
+    // ============================================================
     window.changeTahun = function (y) {
         currentTahun = Number(y);
         const url = new URL(window.location);
@@ -715,20 +1103,20 @@
         loadData();
     };
 
-        window.exportLaporan = function (format) {
-        // Validasi route
+    // ============================================================
+    // EXPORT LAPORAN
+    // ============================================================
+    window.exportLaporan = function (format) {
         if (!DATA.routes.exportPdf || !DATA.routes.exportCsv) {
             toastError('Route export belum tersedia');
             console.error('[Dashboard] Route export tidak ditemukan di window.DASHBOARD_DATA.routes');
             return;
         }
 
-        // Tentukan URL berdasarkan format
         const url = format === 'PDF'
             ? `${DATA.routes.exportPdf}?tahun=${currentTahun}`
             : `${DATA.routes.exportCsv}?tahun=${currentTahun}`;
 
-        // Tampilkan loading
         Swal.fire({
             title: `Menyiapkan ${format}...`,
             html: `<p class="text-sm text-gray-500">Mohon tunggu, file sedang dibuat.</p>`,
@@ -738,7 +1126,6 @@
             customClass: { popup: 'rounded-2xl' },
         });
 
-        // Fetch & download
         fetch(url, {
             method: 'GET',
             headers: {
@@ -751,7 +1138,6 @@
                 throw new Error(`HTTP ${res.status}: ${res.statusText}`);
             }
 
-            // Ambil filename dari header Content-Disposition
             const disposition = res.headers.get('Content-Disposition') || '';
             let filename = `laporan-${currentTahun}.${format.toLowerCase()}`;
             const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -759,7 +1145,6 @@
                 filename = match[1].replace(/['"]/g, '');
             }
 
-            // Konversi ke blob & trigger download
             const blob = await res.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -780,5 +1165,8 @@
         });
     };
 
+    // ============================================================
+    // INIT
+    // ============================================================
     document.addEventListener('DOMContentLoaded', loadData);
 })();

@@ -284,12 +284,12 @@ class DashboardService
 
         return $pengadaans->map(function ($p) {
             $progress = $p->progress_otomatis;
-                $status = 'Belum dimulai';
-                if ($progress === 100) {
-                    $status = 'Selesai';
-                } elseif ($progress > 0) {
-                    $status = 'Pelaksanaan';
-                }
+            $status = 'Belum dimulai';
+            if ($progress === 100) {
+                $status = 'Selesai';
+            } elseif ($progress > 0) {
+                $status = 'Pelaksanaan';
+            }
 
             $jenis = $p->jenisPengadaan?->nama ?? '-';
 
@@ -370,6 +370,219 @@ class DashboardService
             'total_realisasi' => $pnbp->total_realisasi,
             'capaian' => $pnbp->capaian,
             'kategoris' => $kategoriList,
+        ];
+    }
+
+    // ============================================================
+    // SECTION BARU: CATATAN UMPAN BALIK KENDALA
+    // ============================================================
+
+    /**
+     * Matriks Manajemen Risiko Realisasi Anggaran
+     * Ambil kendala aktif (status='Proses') untuk tahun tertentu
+     * Data dampak & tindak_lanjut diambil dari DB
+     */
+    public function getCatatanKendala(int $tahun): array
+    {
+        $kendalas = Kendala::query()
+            ->with(['kategoriKendala:id,nama'])
+            ->proses()
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->limit(10)
+            ->get();
+
+        $items = [];
+        foreach ($kendalas as $k) {
+            $items[] = [
+                'id' => $k->id,
+                'kendala' => $k->deskripsi,
+                'kategori' => $k->kategoriKendala?->nama ?? 'Umum',
+                'dampak' => $k->dampak,
+                'tindak_lanjut' => $k->tindak_lanjut,
+            ];
+        }
+
+        if (empty($items)) {
+            $items = [
+                [
+                    'id' => 0,
+                    'kendala' => 'Kelengkapan dokumen pembayaran belum terpenuhi',
+                    'kategori' => 'Administrasi',
+                    'dampak' => 'Pencairan anggaran tertunda dan realisasi bulanan tidak sesuai rencana.',
+                    'tindak_lanjut' => 'Memeriksa kelengkapan dokumen sebelum pengajuan, menetapkan PIC dan batas waktu penyelesaian, serta berkoordinasi dengan pengelola keuangan dan KPPN.',
+                ],
+                [
+                    'id' => 0,
+                    'kendala' => 'Pengadaan barang/jasa belum selesai sesuai jadwal',
+                    'kategori' => 'Pengadaan',
+                    'dampak' => 'Pembayaran dan pemanfaatan barang/jasa tertunda sehingga penyerapan anggaran melambat.',
+                    'tindak_lanjut' => 'Mempercepat proses pengadaan, monitoring jadwal, dan tindak lanjut dengan penyedia.',
+                ],
+            ];
+        }
+
+        return [
+            'title' => 'Matriks Manajemen Risiko Realisasi Anggaran',
+            'subtitle' => 'Identifikasi kendala/risiko, dampak, dan mitigasi',
+            'items' => $items,
+        ];
+    }
+
+    // ============================================================
+    // SECTION BARU: RENCANA PENGADAAN
+    // ============================================================
+
+    /**
+     * Rencana Pengadaan
+     * Ambil 5 paket pengadaan terbaru untuk tahun tertentu
+     */
+    public function getRencanaPengadaan(int $tahun): array
+    {
+        $pengadaans = \App\Models\Pengadaan::query()
+            ->with(['jenisPengadaan:id,nama'])
+            ->whereYear('tanggal_mulai', $tahun)
+            ->orderBy('tanggal_mulai', 'asc')
+            ->limit(5)
+            ->get();
+
+        $items = [];
+        foreach ($pengadaans as $p) {
+            // Format waktu
+            $waktu = 'Tanggal pelaksanaan belum ditentukan';
+            if ($p->tanggal_mulai && $p->tanggal_selesai) {
+                $waktu = $p->tanggal_mulai->format('d M Y')
+                       . ' s.d '
+                       . $p->tanggal_selesai->format('d M Y');
+            } elseif ($p->tanggal_mulai) {
+                $waktu = 'Mulai: ' . $p->tanggal_mulai->format('d M Y');
+            }
+
+            // Keterangan progress
+            $keterangan = 'Belum dimulai';
+            if ($p->progress >= 100) {
+                $keterangan = 'Sudah selesai';
+            } elseif ($p->progress > 0) {
+                $keterangan = 'Pelaksanaan';
+            }
+
+            $items[] = [
+                'kode' => $p->kode,
+                'nama' => $p->nama,
+                'jenis' => $p->jenisPengadaan?->nama ?? '-',
+                'anggaran' => (float) $p->nilai,
+                'waktu' => $waktu,
+                'progress' => (int) $p->progress,
+                'keterangan' => $keterangan,
+            ];
+        }
+
+        return [
+            'title' => 'Rencana Pengadaan',
+            'items' => $items,
+        ];
+    }
+
+    // ============================================================
+    // SECTION BARU: AKSELERASI PENYERAPAN ANGGARAN
+    // ============================================================
+
+    /**
+     * Tabel Akselerasi Penyerapan Anggaran
+     * Ambil kegiatan percepatan yang masih berjalan
+     */
+    public function getAkselerasi(int $tahun): array
+    {
+        $items = \App\Models\AkselerasiPenyerapan::query()
+            ->terurut()
+            ->limit(10)
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'kegiatan' => $a->kegiatan,
+                    'jangka_waktu' => $a->jangka_waktu,
+                    'progress' => (int) $a->progress,
+                    'keterangan' => $a->keterangan,
+                ];
+            })
+            ->toArray();
+
+        // Fallback: kalau tidak ada data, pakai contoh default
+        if (empty($items)) {
+            $items = [
+                [
+                    'id' => 0,
+                    'kegiatan' => 'Percepatan penyelesaian dokumen pencairan anggaran',
+                    'jangka_waktu' => 'Oktober 2026',
+                    'progress' => 75,
+                    'keterangan' => 'Koordinasi kelengkapan dokumen dengan unit terkait',
+                ],
+                [
+                    'id' => 0,
+                    'kegiatan' => 'Percepatan proses pengadaan barang/jasa',
+                    'jangka_waktu' => 'Oktober–November 2026',
+                    'progress' => 60,
+                    'keterangan' => 'Pemantauan jadwal dan tindak lanjut dengan penyedia',
+                ],
+                [
+                    'id' => 0,
+                    'kegiatan' => 'Monitoring realisasi anggaran setiap minggu',
+                    'jangka_waktu' => 'Minggu s.d Desember 2026',
+                    'progress' => 50,
+                    'keterangan' => 'Evaluasi deviasi target dan tindak lanjut kendala',
+                ],
+            ];
+        }
+
+        return [
+            'title' => 'Tabel Akselerasi Penyerapan Anggaran',
+            'subtitle' => 'Kegiatan percepatan pencapaian target anggaran',
+            'items' => $items,
+        ];
+    }
+
+    // ============================================================
+    // KENDALA DALAM PENGADAAN
+    // ============================================================
+
+    /**
+     * Kendala dalam Pengadaan
+     * Ambil kendala dari tahapan pengadaan yang belum selesai
+     * Data dampak & tindak_lanjut diambil dari DB
+     */
+    public function getKendalaPengadaan(int $tahun): array
+    {
+        $tahapans = \App\Models\PengadaanTahapan::query()
+            ->with(['pengadaan:id,kode,nama,jenis_pengadaan_id'])
+            ->whereNotNull('kendala')
+            ->where('kendala', '!=', '')
+            ->where('selesai', false)
+            ->where('kendala_selesai', false)                  // ⬅️ TAMBAH — hanya kendala AKTIF
+            ->whereHas('pengadaan', function ($q) use ($tahun) {
+                $q->whereYear('tanggal_mulai', $tahun);
+            })
+            ->orderBy('pengadaan_id')
+            ->orderBy('urutan')
+            ->limit(10)
+            ->get();
+
+        $items = [];
+        foreach ($tahapans as $t) {
+            $items[] = [
+                'id' => $t->id,
+                'kategori' => $t->nama,
+                'kendala' => $t->kendala,
+                'dampak' => $t->dampak,
+                'tindak_lanjut' => $t->tindak_lanjut,
+                'pengadaan_kode' => $t->pengadaan?->kode ?? '-',
+            ];
+        }
+
+        return [
+            'title' => 'Kendala dalam Pengadaan',
+            'subtitle' => 'Kendala tahapan pengadaan, dampak, dan tindak lanjut',
+            'items' => $items,
         ];
     }
 }
