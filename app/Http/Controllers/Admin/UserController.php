@@ -13,17 +13,11 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    /**
-     * Halaman list user.
-     */
     public function index(): View
     {
         return view('admin.users');
     }
 
-    /**
-     * Ambil data user via AJAX.
-     */
     public function data(): JsonResponse
     {
         $users = User::orderBy('id')->get()->map(fn ($u) => [
@@ -44,13 +38,15 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Simpan user baru.
-     */
     public function store(StoreUserRequest $request): JsonResponse
     {
         $data = $request->validated();
         $data['active'] = true;
+
+        // ⭐ SECURITY: Pastikan password di-hash (kalau belum di-hash di Form Request)
+        if (!empty($data['password']) && !Hash::needsRehash($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
 
         $user = User::create($data);
 
@@ -61,14 +57,10 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update user.
-     */
     public function update(UpdateUserRequest $request, int $id): JsonResponse
     {
         $user = User::findOrFail($id);
 
-        // ⭐ SECURITY: Kalau ganti password user LAIN → butuh konfirmasi admin
         if ($request->filled('password') && $user->id !== auth()->id()) {
             if (!$this->hasRecentPasswordConfirmation()) {
                 return response()->json([
@@ -83,6 +75,8 @@ class UserController extends Controller
 
         if (empty($data['password'])) {
             unset($data['password']);
+        } else {
+            $data['password'] = Hash::make($data['password']);
         }
 
         $user->update($data);
@@ -94,9 +88,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Toggle status aktif user.
-     */
     public function toggleActive(int $id): JsonResponse
     {
         $user = User::findOrFail($id);
@@ -108,7 +99,6 @@ class UserController extends Controller
             ], 422);
         }
 
-        // ⭐ SECURITY: Butuh konfirmasi admin
         if (!$this->hasRecentPasswordConfirmation()) {
             return response()->json([
                 'ok' => false,
@@ -126,9 +116,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Hapus user (soft delete).
-     */
     public function destroy(int $id): JsonResponse
     {
         $user = User::findOrFail($id);
@@ -140,7 +127,6 @@ class UserController extends Controller
             ], 422);
         }
 
-        // ⭐ SECURITY: Butuh konfirmasi admin
         if (!$this->hasRecentPasswordConfirmation()) {
             return response()->json([
                 'ok' => false,
@@ -157,9 +143,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Cek apakah admin sudah konfirmasi password (dalam 5 menit terakhir).
-     */
     protected function hasRecentPasswordConfirmation(int $timeoutMinutes = 5): bool
     {
         $confirmedAt = session('password_confirmed_at');

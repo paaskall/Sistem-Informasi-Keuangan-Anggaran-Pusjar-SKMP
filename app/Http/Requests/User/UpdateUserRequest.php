@@ -4,39 +4,55 @@ namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check() && auth()->user()->role === 'admin';
     }
 
     public function rules(): array
     {
-        $id = $this->route('id');
+        $userId = $this->route('id');
 
         return [
-            'name' => ['required', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:255'],
             'username' => [
-                'required', 'string', 'max:50', 'alpha_dash',
-                Rule::unique('users', 'username')->ignore($id),
+                'required',
+                'string',
+                'max:50',
+                'alpha_dash',
+                Rule::unique('users', 'username')->ignore($userId),
             ],
-            'password' => ['nullable', 'string', 'min:5', 'max:100'],
-            'role' => ['required', Rule::in(['admin', 'keuangan', 'pimpinan', 'viewer'])],
-            'unit' => ['required', 'string', 'max:100'],
+            'password' => [
+                'nullable',   // boleh kosong saat edit
+                'string',
+                'confirmed',
+                Password::min(12)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
+            'role' => ['required', 'in:admin,keuangan,pimpinan,viewer'],
+            'unit' => ['required', 'string', 'max:255'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'username.required' => 'Username wajib diisi.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password.min' => 'Password minimal 12 karakter.',
+            'password.mixed' => 'Password harus mengandung huruf besar & huruf kecil.',
+            'password.numbers' => 'Password harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Password harus mengandung minimal 1 simbol.',
+            'password.uncompromised' => 'Password ini pernah bocor di internet. Gunakan password lain.',
+            'username.alpha_dash' => 'Username hanya boleh huruf, angka, dash, dan underscore.',
             'username.unique' => 'Username sudah dipakai.',
-            'role.required' => 'Role wajib dipilih.',
-            'role.in' => 'Role tidak valid.',
-            'unit.required' => 'Unit wajib diisi.',
         ];
     }
 }
