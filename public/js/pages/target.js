@@ -1,4 +1,5 @@
 // SIKAP - Target Page (with Tahun Lock)
+// Versi aman XSS
 
 (function () {
     const DATA = window.TARGET_DATA;
@@ -7,7 +8,6 @@
     let references = {};
     const openDetails = new Set();
 
-    // ============ HELPERS ============
     function buildRoute(template, id) {
         return template.replace('__ID__', id);
     }
@@ -44,7 +44,6 @@
         return Number(currentTahun) !== Number(tahunBerjalan);
     }
 
-    // ============ ARSIP BANNER ============
     function updateArsipBanner() {
         const banner = document.getElementById('arsip-banner');
         const tahunEl = document.getElementById('arsip-tahun');
@@ -64,7 +63,6 @@
         if (window.lucide) lucide.createIcons();
     }
 
-    // ============ LOAD DATA ============
     async function loadData() {
         const url = DATA.routes.data + '?tahun=' + currentTahun;
         const res = await apiCall('GET', url);
@@ -82,7 +80,6 @@
         renderTable();
     }
 
-    // ============ RENDER STAT CARDS ============
     function renderStats(totalTahunan, jumlahBulan) {
         const rata = jumlahBulan > 0 ? Math.round(totalTahunan / jumlahBulan) : 0;
         document.getElementById('stat-cards').innerHTML = `
@@ -95,7 +92,6 @@
         if (window.lucide) lucide.createIcons();
     }
 
-    // ============ RENDER TABLE ============
     function renderTable() {
         const tbody = document.getElementById('target-tbody');
         const tfoot = document.getElementById('target-tfoot');
@@ -118,7 +114,6 @@
             const isOpen = openDetails.has(t.id);
             const detailCount = t.details.length;
 
-            // Group by program
             const grouped = {};
             t.details.forEach(d => {
                 const progId = d.program_id;
@@ -155,8 +150,8 @@
                                             <i data-lucide="receipt" class="w-3 h-3"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-medium text-gray-800 truncate">${kom ? kom.nama : '-'}</p>
-                                            <p class="text-[9px] text-gray-400 font-mono">${kom ? kom.kode : '-'}</p>
+                                            <p class="text-xs font-medium text-gray-800 truncate">${escapeHtml(kom ? kom.nama : '-')}</p>
+                                            <p class="text-[9px] text-gray-400 font-mono">${escapeHtml(kom ? kom.kode : '-')}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -171,8 +166,8 @@
                                 <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="git-branch" class="w-3 h-3"></i>
                                 </div>
-                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${sub ? sub.kode : '-'}</span>
-                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${sub ? sub.nama : 'Tanpa Sub-Kegiatan'}</span>
+                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(sub ? sub.kode : '-')}</span>
+                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${escapeHtml(sub ? sub.nama : 'Tanpa Sub-Kegiatan')}</span>
                                 <span class="text-xs font-bold text-indigo-700 whitespace-nowrap">${rp(subTotal)}</span>
                                 <span class="text-[10px] text-gray-500 w-12 text-right">${subPct}%</span>
                             </div>
@@ -190,8 +185,8 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${prog ? prog.kode : '???'}</span>
-                                    <span class="text-xs font-bold text-blue-900 truncate">${prog ? prog.nama : 'Tidak diketahui'}</span>
+                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(prog ? prog.kode : '???')}</span>
+                                    <span class="text-xs font-bold text-blue-900 truncate">${escapeHtml(prog ? prog.nama : 'Tidak diketahui')}</span>
                                 </div>
                             </div>
                             <span class="text-sm font-bold text-blue-800 whitespace-nowrap">${rp(progTotal)}</span>
@@ -208,7 +203,7 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-semibold text-gray-800">${monthName(t.bulan)}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(monthName(t.bulan))}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 flex-shrink-0 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
@@ -252,7 +247,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-blue-700"></i>
                                         <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">
-                                            Rincian Target - ${monthName(t.bulan)} ${t.tahun}
+                                            Rincian Target - ${escapeHtml(monthName(t.bulan))} ${escapeHtml(t.tahun)}
                                         </span>
                                     </div>
                                     <span class="text-xs text-gray-500">Total: ${rp(t.total)}</span>
@@ -264,7 +259,6 @@
                 </tr>`;
         }).join('');
 
-        // Footer
         const totalTahunan = targets.reduce((s, t) => s + t.total, 0);
         tfoot.innerHTML = `
             <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-100">
@@ -280,7 +274,6 @@
         if (window.lucide) lucide.createIcons();
     }
 
-    // ============ TOGGLE DETAIL ============
     window.toggleDetail = function (targetId) {
         const row = document.querySelector(`tr[data-target-id="${targetId}"]`);
         const expandRow = document.querySelector(`tr[data-expand-for="${targetId}"]`);
@@ -306,20 +299,15 @@
         }
     };
 
-    // ============ CHANGE TAHUN ============
     window.changeTahun = function (y) {
         currentTahun = Number(y);
         openDetails.clear();
-
-        // Update URL
         const url = new URL(window.location);
         url.searchParams.set('tahun', currentTahun);
         window.history.pushState({}, '', url);
-
         loadData();
     };
 
-    // ============ FORM ============
     function buildFormHeader(target) {
         const years = [2026, 2025, 2024];
         return `
@@ -334,7 +322,7 @@
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Bulan</label>
                     <select id="f-bulan" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
                         ${Array.from({ length: 12 }, (_, i) => i + 1).map(m =>
-                            `<option value="${m}" ${target && target.bulan === m ? 'selected' : ''}>${monthName(m)}</option>`
+                            `<option value="${m}" ${target && target.bulan === m ? 'selected' : ''}>${escapeHtml(monthName(m))}</option>`
                         ).join('')}
                     </select>
                 </div>
@@ -360,14 +348,14 @@
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Program</label>
                         <select class="f-program w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">- Pilih Program -</option>
-                            ${programs.map(p => `<option value="${p.id}" ${programId == p.id ? 'selected' : ''}>${p.kode} - ${p.nama}</option>`).join('')}
+                            ${programs.map(p => `<option value="${escapeHtml(p.id)}" ${programId == p.id ? 'selected' : ''}>${escapeHtml(p.kode)} - ${escapeHtml(p.nama)}</option>`).join('')}
                         </select>
                     </div>
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Sub-Kegiatan</label>
                         <select class="f-sub w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">- Pilih Sub-Kegiatan -</option>
-                            ${subOptions.map(s => `<option value="${s.id}" ${subId == s.id ? 'selected' : ''}>${s.kode} - ${s.nama}</option>`).join('')}
+                            ${subOptions.map(s => `<option value="${escapeHtml(s.id)}" ${subId == s.id ? 'selected' : ''}>${escapeHtml(s.kode)} - ${escapeHtml(s.nama)}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -376,7 +364,7 @@
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Komponen Belanja</label>
                         <select class="f-komponen w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 bg-white">
                             <option value="">- Pilih Komponen -</option>
-                            ${komponens.map(k => `<option value="${k.id}" ${kompId == k.id ? 'selected' : ''}>${k.kode} - ${k.nama}</option>`).join('')}
+                            ${komponens.map(k => `<option value="${escapeHtml(k.id)}" ${kompId == k.id ? 'selected' : ''}>${escapeHtml(k.kode)} - ${escapeHtml(k.nama)}</option>`).join('')}
                         </select>
                     </div>
                     <div>
@@ -455,7 +443,7 @@
                     const pid = Number(progEl.value);
                     const subs = (references.sub_kegiatans || []).filter(s => s.program_id === pid);
                     subEl.innerHTML = '<option value="">- Pilih Sub-Kegiatan -</option>' +
-                        subs.map(s => `<option value="${s.id}">${s.kode} - ${s.nama}</option>`).join('');
+                        subs.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.kode)} - ${escapeHtml(s.nama)}</option>`).join('');
                 });
                 progEl.dataset.bound = '1';
             }
@@ -505,7 +493,6 @@
         }, 150);
     };
 
-    // ============ OPEN FORM ============
     window.openTargetForm = function (id) {
         if (isTahunArsip()) {
             toastError('Tahun ' + currentTahun + ' sudah dikunci (arsip). Tidak bisa edit.');
@@ -559,7 +546,6 @@
         });
     };
 
-    // ============ DELETE ============
     window.deleteTarget = function (id) {
         const t = targets.find(x => x.id === id);
         if (!t) return;
@@ -573,7 +559,7 @@
             title: 'Hapus Target?',
             html: `
                 <div class="text-sm text-gray-600 text-left">
-                    <p>Anda akan menghapus <b>${monthName(t.bulan)} ${t.tahun}</b>.</p>
+                    <p>Anda akan menghapus <b>${escapeHtml(monthName(t.bulan))} ${escapeHtml(t.tahun)}</b>.</p>
                     <div class="bg-red-50 border border-red-200 rounded p-2 mt-2 text-xs">
                         <b class="text-red-700">⚠ Peringatan:</b>
                         <p class="text-red-600 mt-1">Data yang dihapus tidak bisa dikembalikan.</p>
@@ -607,6 +593,5 @@
         });
     };
 
-    // ============ INIT ============
     document.addEventListener('DOMContentLoaded', loadData);
 })();

@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Pengadaan Viewer (Read-Only)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -43,7 +44,7 @@
             'Batal': 'bg-red-100 text-red-700',
         };
         const cls = map[s] || 'bg-gray-100 text-gray-700';
-        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${s}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHtml(s)}</span>`;
     }
 
     async function loadData() {
@@ -68,7 +69,8 @@
             ${statCard({ label: 'Proses', value: stats.proses, icon: 'loader', color: 'amber' })}
             ${statCard({ label: 'Selesai', value: stats.selesai, icon: 'check-circle', color: 'emerald' })}
         `;
-        const filterInfoEl = document.getElementById('filter-info'); if (filterInfoEl) filterInfoEl.innerHTML = `${pengadaans.length} paket ditampilkan`;
+        const filterInfoEl = document.getElementById('filter-info'); 
+        if (filterInfoEl) filterInfoEl.innerHTML = `${pengadaans.length} paket ditampilkan`;
         if (window.lucide) lucide.createIcons();
     }
 
@@ -93,15 +95,15 @@
                 <tr class="hover:bg-blue-50/40 transition">
                     <td class="px-4 py-3">
                         <span class="inline-block font-mono text-[11px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                            ${p.kode}
+                            ${escapeHtml(p.kode)}
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                        <p class="font-medium text-gray-800">${p.nama}</p>
-                        ${p.penyedia ? `<p class="text-[10px] text-gray-500 mt-0.5">${p.penyedia}</p>` : ''}
+                        <p class="font-medium text-gray-800">${escapeHtml(p.nama)}</p>
+                        ${p.penyedia ? `<p class="text-[10px] text-gray-500 mt-0.5">${escapeHtml(p.penyedia)}</p>` : ''}
                         <p class="text-[10px] text-gray-400 mt-0.5">${rp(p.nilai)}</p>
                     </td>
-                    <td class="px-4 py-3 text-gray-600 text-xs">${p.jenis}</td>
+                    <td class="px-4 py-3 text-gray-600 text-xs">${escapeHtml(p.jenis)}</td>
                     <td class="px-4 py-3">
                         <div class="progress-bar-container">
                             <div class="progress-bar">

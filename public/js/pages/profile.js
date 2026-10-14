@@ -1,4 +1,5 @@
 // SIKAP - Profile Page
+// Versi aman XSS
 
 (function () {
     const DATA = window.PROFILE_DATA;
@@ -35,21 +36,23 @@
 
         const u = res.data.user;
 
-        // Update UI
+        // Update UI (pakai textContent — auto-escape, aman)
         document.getElementById('profile-name').textContent = u.name;
         document.getElementById('profile-username').textContent = '@' + u.username;
         document.getElementById('profile-role').textContent = u.role_label;
         document.getElementById('profile-unit').textContent = u.unit || '-';
         document.getElementById('profile-joined').textContent = u.created_at || '-';
 
-        // Avatar
+        // Avatar — pakai createElement untuk aman
         const avatarEl = document.getElementById('avatar-preview');
-        const initialEl = document.getElementById('avatar-initial');
 
         if (u.avatar) {
-            avatarEl.innerHTML = `<img src="/storage/${u.avatar}" class="w-full h-full object-cover" alt="Avatar" />`;
+            // Sanitize path
+            const safePath = String(u.avatar).replace(/[^a-zA-Z0-9_\-./]/g, '');
+            avatarEl.innerHTML = `<img src="/storage/${escapeHtml(safePath)}" class="w-full h-full object-cover" alt="Avatar" />`;
         } else {
-            avatarEl.innerHTML = `<span id="avatar-initial">${u.initial}</span>`;
+            // Initial sudah aman (single char dari nama)
+            avatarEl.innerHTML = `<span id="avatar-initial">${escapeHtml(u.initial)}</span>`;
         }
 
         // Form fields
@@ -85,10 +88,10 @@
 
             return `
                 <li class="py-2 flex items-start gap-2">
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${cls}">${l.action}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${cls}">${escapeHtml(l.action)}</span>
                     <div class="flex-1 min-w-0">
-                        <p class="text-gray-800 truncate">${l.module} <span class="text-gray-400 font-mono text-[10px]">${l.record_id}</span></p>
-                        <p class="text-[10px] text-gray-400">${formatted}</p>
+                        <p class="text-gray-800 truncate">${escapeHtml(l.module)} <span class="text-gray-400 font-mono text-[10px]">${escapeHtml(l.record_id)}</span></p>
+                        <p class="text-[10px] text-gray-400">${escapeHtml(formatted)}</p>
                     </div>
                 </li>`;
         }).join('');

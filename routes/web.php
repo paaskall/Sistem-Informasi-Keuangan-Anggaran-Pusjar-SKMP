@@ -26,6 +26,12 @@ use App\Http\Controllers\Keuangan\PnbpController;
 use App\Http\Controllers\Pimpinan\PnbpController as PimpinanPnbpController;
 use App\Http\Controllers\Viewer\PnbpController as ViewerPnbpController;
 use App\Http\Controllers\Keuangan\AkselerasiController;
+use App\Http\Controllers\SsoController;
+
+// ============================================================
+// SSO CALLBACK (HARUS di paling atas, DI LUAR middleware apapun)
+// ============================================================
+Route::get('/sso/callback', [SsoController::class, 'callback'])->name('sso.callback');
 
 // ============================================================
 // AUTH ROUTES (guest)

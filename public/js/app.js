@@ -2,8 +2,30 @@
 // SIKAP — App Helpers (Global)
 // ============================================================
 
+// SIKAP — Global Security Helpers
+
+/**
+ * Escape HTML entities untuk cegah XSS
+ * Pakai untuk SEMUA data dari user/server sebelum masuk innerHTML
+ */
+window.escapeHtml = function (str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+/**
+ * Escape untuk attribute value (sama dengan escapeHtml, bisa extend)
+ */
+window.escapeAttr = function (str) {
+    return window.escapeHtml(str);
+};
+
 // ============ SWEETALERT THEME ============
-// ============ SWEETALERT THEME (Blueprint) ============
 const swalTheme = Swal.mixin({
     customClass: {
         popup: 'rounded-2xl p-8',

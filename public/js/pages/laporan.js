@@ -1,4 +1,5 @@
 // SIKAP - Laporan (Pimpinan)
+// Versi aman XSS
 
 (function () {
     const DATA = window.LAPORAN_DATA;
@@ -62,7 +63,7 @@
         const tfoot = document.getElementById('laporan-tfoot');
 
         if (bulanData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-400">Belum ada data untuk tahun ${currentTahun}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-400">Belum ada data untuk tahun ${escapeHtml(currentTahun)}</td></tr>`;
             tfoot.innerHTML = '';
             return;
         }
@@ -123,8 +124,8 @@
                                             <i data-lucide="receipt" class="w-3 h-3"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-medium text-gray-800 truncate">${kom ? kom.nama : '-'}</p>
-                                            <p class="text-[9px] text-gray-400 font-mono">${kom ? kom.kode : '-'}</p>
+                                            <p class="text-xs font-medium text-gray-800 truncate">${escapeHtml(kom ? kom.nama : '-')}</p>
+                                            <p class="text-[9px] text-gray-400 font-mono">${escapeHtml(kom ? kom.kode : '-')}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -142,8 +143,8 @@
                                 <div class="w-5 h-5 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="git-branch" class="w-2.5 h-2.5"></i>
                                 </div>
-                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${sub ? sub.kode : '-'}</span>
-                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${sub ? sub.nama : 'Tanpa Sub'}</span>
+                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(sub ? sub.kode : '-')}</span>
+                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${escapeHtml(sub ? sub.nama : 'Tanpa Sub')}</span>
                                 <span class="text-[10px] text-blue-700 font-semibold">T: ${rp(s.target)}</span>
                                 <span class="text-[10px] text-emerald-700 font-semibold">R: ${rp(s.realisasi)}</span>
                                 <span class="text-[10px] font-bold ${subCap >= 100 ? 'text-green-700' : subCap >= 70 ? 'text-blue-700' : subCap >= 40 ? 'text-amber-700' : 'text-red-700'} w-10 text-right">${subCap}%</span>
@@ -162,8 +163,8 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${prog ? prog.kode : '???'}</span>
-                                    <span class="text-xs font-bold text-blue-900 truncate">${prog ? prog.nama : 'Tidak diketahui'}</span>
+                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(prog ? prog.kode : '???')}</span>
+                                    <span class="text-xs font-bold text-blue-900 truncate">${escapeHtml(prog ? prog.nama : 'Tidak diketahui')}</span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 text-[10px]">
@@ -183,7 +184,7 @@
                     </td>
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-2">
-                            <span class="font-semibold text-gray-800">${m.bulan_nama}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(m.bulan_nama)}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
@@ -212,7 +213,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-blue-700"></i>
                                         <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">
-                                            Breakdown ${m.bulan_nama} ${currentTahun}
+                                            Breakdown ${escapeHtml(m.bulan_nama)} ${escapeHtml(currentTahun)}
                                         </span>
                                     </div>
                                 </div>
@@ -229,7 +230,7 @@
         const capTotal = totalT > 0 ? Math.round((totalR / totalT) * 100) : 0;
         tfoot.innerHTML = `
             <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
-                <td colspan="3" class="px-5 py-4 font-bold text-blue-900 text-sm">TOTAL TAHUNAN ${currentTahun}</td>
+                <td colspan="3" class="px-5 py-4 font-bold text-blue-900 text-sm">TOTAL TAHUNAN ${escapeHtml(currentTahun)}</td>
                 <td class="px-5 py-4 text-right font-bold text-blue-800 text-sm whitespace-nowrap">${rp(totalT)}</td>
                 <td class="px-5 py-4 text-right font-bold text-emerald-700 text-sm whitespace-nowrap">${rp(totalR)}</td>
                 <td class="px-5 py-4 text-center">
@@ -284,7 +285,6 @@
             ? `${window.LAPORAN_DATA.routes.exportPdf}?tahun=${currentTahun}`
             : `${window.LAPORAN_DATA.routes.exportCsv}?tahun=${currentTahun}`;
 
-        // Tampilkan loading
         const Toast2 = Swal.fire({
             title: `Menyiapkan ${format}...`,
             allowOutsideClick: false,
@@ -294,10 +294,8 @@
             },
         });
 
-        // Trigger download
         window.location.href = url;
 
-        // Close loading setelah beberapa detik
         setTimeout(() => {
             Swal.close();
             toastSuccess(`${format} berhasil diunduh`);

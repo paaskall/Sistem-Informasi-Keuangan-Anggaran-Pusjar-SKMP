@@ -1,5 +1,6 @@
 // ============================================================
-// SIKAP - PNBP Viewer (Read-Only untuk Pimpinan & Viewer)
+// SIKAP - PNBP Viewer (Read-Only)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -74,8 +75,8 @@
                         <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-white font-bold text-base">Total Realisasi Penerimaan PNBP ${p.tahun}</h3>
-                        <p class="text-emerald-100 text-xs mt-0.5">${p.unit || '-'}</p>
+                        <h3 class="text-white font-bold text-base">Total Realisasi Penerimaan PNBP ${escapeHtml(p.tahun)}</h3>
+                        <p class="text-emerald-100 text-xs mt-0.5">${escapeHtml(p.unit || '-')}</p>
                     </div>
                 </div>
 
@@ -135,7 +136,7 @@
                 <tr>
                     <td colspan="5" class="text-center py-10 text-gray-400">
                         <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-                        <p class="text-sm">Belum ada data PNBP untuk tahun ${currentTahun}</p>
+                        <p class="text-sm">Belum ada data PNBP untuk tahun ${escapeHtml(currentTahun)}</p>
                     </td>
                 </tr>`;
             tfoot.innerHTML = '';
@@ -152,7 +153,6 @@
 
             const totalSub = b.kategoris.reduce((s, k) => s + (k.children?.length || 0), 0);
 
-            // Detail rows
             const detailRowsHtml = b.kategoris.map(kat => {
                 const katCapColor = kat.capaian >= 100 ? 'text-green-700 bg-green-50'
                                     : kat.capaian >= 70 ? 'text-blue-700 bg-blue-50'
@@ -168,7 +168,7 @@
                                 <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
                                 </div>
-                                <span class="text-xs font-bold text-gray-800">${kat.nama}</span>
+                                <span class="text-xs font-bold text-gray-800">${escapeHtml(kat.nama)}</span>
                                 ${kat.has_children ? `<span class="text-[9px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full">${kat.children.length} sub</span>` : ''}
                             </div>
                         </td>
@@ -197,7 +197,7 @@
                                 <td class="py-2.5 pl-12 pr-3 text-left">
                                     <div class="flex items-center gap-2">
                                         <span class="text-gray-300 font-mono">├─</span>
-                                        <span class="text-xs font-medium text-gray-700">${c.nama}</span>
+                                        <span class="text-xs font-medium text-gray-700">${escapeHtml(c.nama)}</span>
                                     </div>
                                 </td>
                                 <td class="py-2.5 px-2 text-right text-xs text-blue-600 whitespace-nowrap">${rp(c.target)}</td>
@@ -207,7 +207,7 @@
                                 </td>
                                 <td class="py-2.5 pl-2 pr-4 text-right">
                                     <span class="inline-flex items-center gap-1 text-[10px] font-bold ${pesertaPct >= 100 ? 'text-green-700 bg-green-50' : pesertaPct >= 70 ? 'text-blue-700 bg-blue-50' : 'text-amber-700 bg-amber-50'} px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                        ${c.peserta_realisasi}/${c.peserta_target}
+                                        👥 ${c.peserta_realisasi}/${c.peserta_target}
                                     </span>
                                 </td>
                             </tr>
@@ -227,7 +227,7 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-semibold text-gray-800">${b.bulan_nama}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(b.bulan_nama)}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 flex-shrink-0 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
@@ -256,7 +256,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-emerald-700"></i>
                                         <span class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                                            Rincian PNBP - ${b.bulan_nama} ${pnbp.tahun}
+                                            Rincian PNBP - ${escapeHtml(b.bulan_nama)} ${escapeHtml(pnbp.tahun)}
                                         </span>
                                     </div>
                                     <span class="text-xs text-gray-500">Total: ${rp(b.total_realisasi)}</span>
@@ -276,7 +276,7 @@
                                         <tbody>${detailRowsHtml}</tbody>
                                         <tfoot class="bg-gradient-to-r from-blue-50 to-emerald-50 border-t-2 border-emerald-200">
                                             <tr>
-                                                <td class="py-3 pl-4 pr-3 font-bold text-emerald-900 text-xs uppercase">Total ${b.bulan_nama}</td>
+                                                <td class="py-3 pl-4 pr-3 font-bold text-emerald-900 text-xs uppercase">Total ${escapeHtml(b.bulan_nama)}</td>
                                                 <td class="py-3 px-2 text-right font-bold text-blue-800 text-xs whitespace-nowrap">${rp(b.total_target)}</td>
                                                 <td class="py-3 px-2 text-right font-bold text-emerald-800 text-xs whitespace-nowrap">${rp(b.total_realisasi)}</td>
                                                 <td class="py-3 px-2 text-right text-xs font-bold text-amber-700">${b.capaian}%</td>
@@ -292,11 +292,10 @@
             `;
         }).join('');
 
-        // Footer total tahunan
         tfoot.innerHTML = `
             <tr class="bg-gradient-to-r from-emerald-50 to-blue-50 border-t-2 border-emerald-100">
                 <td colspan="3" class="px-5 py-4 text-center font-bold text-emerald-900 text-sm">
-                    TOTAL TAHUNAN ${pnbp.tahun}
+                    TOTAL TAHUNAN ${escapeHtml(pnbp.tahun)}
                 </td>
                 <td class="px-5 py-4 text-center font-bold text-emerald-800 text-base whitespace-nowrap">
                     ${rp(pnbp.total_target)}

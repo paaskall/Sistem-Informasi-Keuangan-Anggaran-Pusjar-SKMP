@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Dashboard (Keuangan & Pimpinan & Viewer)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -73,13 +74,10 @@
         renderChart(d.per_bulan);
         renderProgressPengadaan(d.progress_pengadaan);
         renderRencanaBulanIni(d.rencana_bulan_ini);
-
-        // 3 SECTION BARU
         renderCatatanKendala(d.catatan_kendala);
         renderAkselerasi(d.akselerasi);
         renderKendalaPengadaan(d.kendala_pengadaan);
         renderRencanaPengadaan(d.rencana_pengadaan);
-
         renderBulanIni(d.bulan_ini);
         if (d.ringkasan_modul) renderRingkasanModul(d.ringkasan_modul);
         updateArsipBanner();
@@ -119,7 +117,7 @@
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-white font-bold text-base">Target dan Realisasi Anggaran Tahun ${currentTahun}</h3>
+                        <h3 class="text-white font-bold text-base">Target dan Realisasi Anggaran Tahun ${escapeHtml(currentTahun)}</h3>
                         <p class="text-blue-100 text-xs mt-0.5">Ringkasan eksekutif pencapaian anggaran</p>
                     </div>
                 </div>
@@ -254,10 +252,10 @@
                             <span class="text-2xl font-bold ${capText}">${item.progress}%</span>
                         </div>
                     </div>
-                    <p class="text-sm font-semibold text-gray-800 leading-tight mb-1 max-w-[180px]">${item.nama}</p>
+                    <p class="text-sm font-semibold text-gray-800 leading-tight mb-1 max-w-[180px]">${escapeHtml(item.nama)}</p>
                     <p class="text-[11px] text-gray-500 mb-2">(${formatNilaiShort(item.nilai)})</p>
                     <span class="inline-block text-[10px] font-bold ${statusClass} px-2.5 py-1 rounded-full">
-                        ${item.keterangan}
+                        ${escapeHtml(item.keterangan)}
                     </span>
                 </div>`;
         }).join('');
@@ -307,7 +305,7 @@
                         <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
                             <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
                         </div>
-                        <p class="text-sm text-gray-500 mb-3">Belum ada data PNBP untuk tahun ${currentTahun}</p>
+                        <p class="text-sm text-gray-500 mb-3">Belum ada data PNBP untuk tahun ${escapeHtml(currentTahun)}</p>
                         <a href="/keuangan/pnbp?tahun=${currentTahun}"
                         class="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition">
                             <i data-lucide="plus" class="w-3 h-3"></i> Buat Data PNBP
@@ -342,7 +340,7 @@
             return `
                 <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0 flex-1">
-                        <p class="text-xs font-semibold text-gray-700 truncate">${k.nama}</p>
+                        <p class="text-xs font-semibold text-gray-700 truncate">${escapeHtml(k.nama)}</p>
                         <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden mt-1">
                             <div class="bg-gradient-to-r ${kBarColor} h-full rounded-full transition-all duration-700"
                                 style="width: ${Math.min(kCap, 100)}%"></div>
@@ -364,7 +362,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-white font-bold text-base">Realisasi Penerimaan PNBP</h3>
-                        <p class="text-emerald-100 text-xs mt-0.5">Tahun ${data.tahun} · ${data.unit || '-'}</p>
+                        <p class="text-emerald-100 text-xs mt-0.5">Tahun ${escapeHtml(data.tahun)} · ${escapeHtml(data.unit || '-')}</p>
                     </div>
                 </div>
 
@@ -469,17 +467,17 @@
                             <span class="text-[10px] font-bold text-blue-700 mb-1 whitespace-nowrap">${fmtShort(b.target)}</span>
                             <div class="w-full max-w-[24px] bg-gradient-to-t from-blue-700 via-blue-600 to-blue-400 rounded-t-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-300/50 group-hover:scale-x-110 cursor-pointer"
                                  style="height: ${targetPct}%;"
-                                 title="Target ${b.bulan_nama}: ${fmtFull(b.target)}"></div>
+                                 title="Target ${escapeHtml(b.bulan_nama)}: ${fmtFull(b.target)}"></div>
                         </div>
                         <div class="flex-1 flex flex-col items-center justify-end h-full relative">
                             <span class="text-[10px] font-bold text-emerald-700 mb-1 whitespace-nowrap">${fmtShort(b.realisasi)}</span>
                             <div class="w-full max-w-[24px] bg-gradient-to-t from-emerald-700 via-emerald-600 to-emerald-400 rounded-t-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-emerald-300/50 group-hover:scale-x-110 cursor-pointer"
                                  style="height: ${realPct}%;"
-                                 title="Realisasi ${b.bulan_nama}: ${fmtFull(b.realisasi)}"></div>
+                                 title="Realisasi ${escapeHtml(b.bulan_nama)}: ${fmtFull(b.realisasi)}"></div>
                         </div>
                     </div>
                     <div class="mt-2 flex flex-col items-center gap-1">
-                        <span class="text-[11px] font-bold text-gray-700 whitespace-nowrap">${b.bulan_short}</span>
+                        <span class="text-[11px] font-bold text-gray-700 whitespace-nowrap">${escapeHtml(b.bulan_short)}</span>
                         <span class="text-[9px] font-bold ${capClass} border px-1.5 py-0.5 rounded-full whitespace-nowrap">${b.capaian}%</span>
                     </div>
                 </div>`;
@@ -566,8 +564,8 @@
                 <tr class="border-b border-gray-100 last:border-0 hover:bg-blue-50/30">
                     <td class="px-4 py-3 text-center text-xs text-gray-500 font-semibold w-12">${idx + 1}</td>
                     <td class="px-4 py-3">
-                        <p class="text-sm font-medium text-gray-800">${item.nama}</p>
-                        <p class="text-[10px] text-gray-400">${item.kode}</p>
+                        <p class="text-sm font-medium text-gray-800">${escapeHtml(item.nama)}</p>
+                        <p class="text-[10px] text-gray-400">${escapeHtml(item.kode)}</p>
                     </td>
                     <td class="px-4 py-3 text-right text-xs text-blue-700 font-semibold whitespace-nowrap">${rp(item.target)}</td>
                     <td class="px-4 py-3 text-right text-xs text-emerald-700 font-semibold whitespace-nowrap">
@@ -579,7 +577,7 @@
                     <td class="px-4 py-3 text-center">
                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${cfg.class} whitespace-nowrap">
                             <i data-lucide="${cfg.icon}" class="w-3 h-3"></i>
-                            ${cfg.label}
+                            ${escapeHtml(cfg.label)}
                         </span>
                     </td>
                 </tr>`;
@@ -604,7 +602,7 @@
                     <div>
                         <h3 class="font-bold text-gray-800 flex items-center gap-2">
                             <i data-lucide="clipboard-list" class="w-5 h-5 text-blue-700"></i>
-                            Rencana Realisasi ${data.bulan_nama} ${data.tahun}
+                            Rencana Realisasi ${escapeHtml(data.bulan_nama)} ${escapeHtml(data.tahun)}
                         </h3>
                         <p class="text-xs text-gray-500 mt-0.5">Daftar pembayaran yang perlu dicairkan bulan ini</p>
                     </div>
@@ -661,7 +659,7 @@
     }
 
     // ============================================================
-    // MATRIKS MANAJEMEN RISIKO REALISASI ANGGARAN (3 KOLOM)
+    // MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA)
     // ============================================================
     function renderCatatanKendala(data) {
         const container = document.getElementById('catatan-kendala-container');
@@ -673,7 +671,6 @@
         }
 
         const rowsHtml = data.items.map((item, idx) => {
-            // Warna badge per kategori
             const katLower = (item.kategori || '').toLowerCase();
             let katClass = 'bg-gray-100 text-gray-700';
             if (katLower.includes('administrasi')) {
@@ -695,22 +692,22 @@
                     </td>
                     <td class="px-4 py-4 align-top" style="width: 40%;">
                         <p class="text-xs font-semibold text-gray-800 leading-snug mb-1.5">
-                            ${item.kendala}
+                            ${escapeHtml(item.kendala)}
                         </p>
                         <span class="inline-block text-[10px] font-bold ${katClass} px-2 py-0.5 rounded-full">
-                            ${item.kategori}
+                            ${escapeHtml(item.kategori)}
                         </span>
                     </td>
                     <td class="px-4 py-4 align-top" style="width: 30%;">
                         ${item.dampak ? `
-                            <p class="text-xs text-gray-700 leading-relaxed">${item.dampak}</p>
+                            <p class="text-xs text-gray-700 leading-relaxed">${escapeHtml(item.dampak)}</p>
                         ` : `
                             <p class="text-xs text-gray-400 italic">Belum diisi</p>
                         `}
                     </td>
                     <td class="px-4 py-4 align-top" style="width: 30%;">
                         ${item.tindak_lanjut ? `
-                            <p class="text-xs text-gray-700 leading-relaxed">${item.tindak_lanjut}</p>
+                            <p class="text-xs text-gray-700 leading-relaxed">${escapeHtml(item.tindak_lanjut)}</p>
                         ` : `
                             <p class="text-xs text-gray-400 italic">Belum diisi</p>
                         `}
@@ -727,10 +724,10 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-base font-bold text-red-900">
-                            ${data.title || 'Matriks Manajemen Risiko Realisasi Anggaran'}
+                            ${escapeHtml(data.title || 'Matriks Manajemen Risiko Realisasi Anggaran')}
                         </h3>
                         <p class="text-[11px] text-red-700 mt-0.5">
-                            ${data.subtitle || 'Identifikasi kendala/risiko, dampak, dan mitigasi'}
+                            ${escapeHtml(data.subtitle || 'Identifikasi kendala/risiko, dampak, dan mitigasi')}
                         </p>
                     </div>
                 </div>
@@ -795,10 +792,10 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between gap-3 mb-2">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-800 leading-snug">${item.kegiatan}</p>
+                                <p class="text-sm font-semibold text-gray-800 leading-snug">${escapeHtml(item.kegiatan)}</p>
                                 <p class="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1">
                                     <i data-lucide="calendar" class="w-3 h-3"></i>
-                                    ${item.jangka_waktu}
+                                    ${escapeHtml(item.jangka_waktu)}
                                 </p>
                             </div>
                             <span class="text-lg font-bold ${pctColor} whitespace-nowrap">${pct}%</span>
@@ -810,7 +807,7 @@
                         ${item.keterangan ? `
                             <div class="flex items-start gap-1.5 text-[11px] text-gray-600">
                                 <i data-lucide="info" class="w-3 h-3 flex-shrink-0 mt-0.5 text-blue-500"></i>
-                                <span>${item.keterangan}</span>
+                                <span>${escapeHtml(item.keterangan)}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -827,7 +824,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-gray-800">
-                                ${data.title || 'Akselerasi Penyerapan Anggaran'}
+                                ${escapeHtml(data.title || 'Akselerasi Penyerapan Anggaran')}
                             </h3>
                             <p class="text-[11px] text-gray-500 mt-0.5">Kegiatan percepatan pencapaian target anggaran</p>
                         </div>
@@ -840,6 +837,98 @@
 
                 <div class="p-4 space-y-2">
                     ${itemsHtml}
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // KENDALA DALAM PENGADAAN (3 KOLOM)
+    // ============================================================
+    function renderKendalaPengadaan(data) {
+        const container = document.getElementById('kendala-pengadaan-container');
+        if (!container) return;
+
+        if (!data || !data.items || data.items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const rowsHtml = data.items.map((item, idx) => `
+            <tr class="border-b border-gray-100 last:border-0 hover:bg-red-50/30 transition">
+                <td class="px-4 py-4 text-center align-top w-12">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 text-red-700 text-xs font-bold">
+                        ${idx + 1}
+                    </span>
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 40%;">
+                    <p class="text-xs font-semibold text-gray-800 leading-snug mb-1.5">
+                        ${escapeHtml(item.kendala)}
+                    </p>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="inline-block text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            ${escapeHtml(item.kategori)}
+                        </span>
+                        ${item.pengadaan_kode && item.pengadaan_kode !== '-' ? `
+                            <span class="inline-block text-[10px] font-mono font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                ${escapeHtml(item.pengadaan_kode)}
+                            </span>
+                        ` : ''}
+                    </div>
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 30%;">
+                    ${item.dampak ? `
+                        <p class="text-xs text-gray-700 leading-relaxed">${escapeHtml(item.dampak)}</p>
+                    ` : `
+                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                    `}
+                </td>
+                <td class="px-4 py-4 align-top" style="width: 30%;">
+                    ${item.tindak_lanjut ? `
+                        <p class="text-xs text-gray-700 leading-relaxed">${escapeHtml(item.tindak_lanjut)}</p>
+                    ` : `
+                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
+                    `}
+                </td>
+            </tr>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border-2 border-red-200 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 flex items-center gap-3 border-b border-red-200/60">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-red-900">
+                            ${escapeHtml(data.title || 'Kendala dalam Pengadaan')}
+                        </h3>
+                        <p class="text-[11px] text-red-700 mt-0.5">
+                            ${escapeHtml(data.subtitle || 'Kendala tahapan pengadaan, dampak, dan tindak lanjut')}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-red-50/60 text-red-900 text-[10px] uppercase">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold text-center w-12">No</th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 40%;">
+                                    Kendala / Risiko
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Dampak Potensial
+                                </th>
+                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
+                                    Tindak Lanjut / Mitigasi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
                 </div>
             </div>
         `;
@@ -869,16 +958,16 @@
                 <tr class="border-b border-gray-100 last:border-0 hover:bg-blue-50/30">
                     <td class="px-3 py-2.5 text-center text-xs text-gray-500 font-semibold w-10">${idx + 1}</td>
                     <td class="px-3 py-2.5">
-                        <p class="text-xs font-medium text-gray-800">${item.nama}</p>
-                        <p class="text-[10px] text-gray-400">${item.kode || ''}</p>
+                        <p class="text-xs font-medium text-gray-800">${escapeHtml(item.nama)}</p>
+                        <p class="text-[10px] text-gray-400">${escapeHtml(item.kode || '')}</p>
                     </td>
                     <td class="px-3 py-2.5 text-right text-xs text-gray-800 font-semibold whitespace-nowrap">${rp(item.anggaran)}</td>
-                    <td class="px-3 py-2.5 text-center text-[11px] text-gray-600 whitespace-nowrap">${item.waktu || '-'}</td>
+                    <td class="px-3 py-2.5 text-center text-[11px] text-gray-600 whitespace-nowrap">${escapeHtml(item.waktu || '-')}</td>
                     <td class="px-3 py-2.5 text-center">
                         <span class="inline-block text-[10px] font-bold px-2 py-1 rounded ${progressColor} whitespace-nowrap">${item.progress}%</span>
                     </td>
                     <td class="px-3 py-2.5 text-center">
-                        <span class="text-[10px] text-gray-600">${item.keterangan || '-'}</span>
+                        <span class="text-[10px] text-gray-600">${escapeHtml(item.keterangan || '-')}</span>
                     </td>
                 </tr>`;
         }).join('');
@@ -940,7 +1029,7 @@
                             <i data-lucide="calendar-days" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-blue-100 uppercase tracking-wider font-semibold">Bulan Ini - ${b.bulan_nama}</p>
+                            <p class="text-xs text-blue-100 uppercase tracking-wider font-semibold">Bulan Ini - ${escapeHtml(b.bulan_nama)}</p>
                             <p class="text-2xl font-bold">${b.capaian}% Tercapai</p>
                         </div>
                     </div>
@@ -974,121 +1063,29 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Program</span>
-                    <span class="font-semibold text-blue-700">: ${r.total_program} program</span>
+                    <span class="font-semibold text-blue-700">: ${escapeHtml(r.total_program)} program</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Sub-Kegiatan</span>
-                    <span class="font-semibold text-indigo-700">: ${r.total_sub_kegiatan} sub</span>
+                    <span class="font-semibold text-indigo-700">: ${escapeHtml(r.total_sub_kegiatan)} sub</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Komponen Belanja</span>
-                    <span class="font-semibold text-emerald-700">: ${r.total_komponen} komponen</span>
+                    <span class="font-semibold text-emerald-700">: ${escapeHtml(r.total_komponen)} komponen</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Target Bulanan</span>
-                    <span class="font-semibold">: ${r.total_target_bulanan} bulan</span>
+                    <span class="font-semibold">: ${escapeHtml(r.total_target_bulanan)} bulan</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Realisasi</span>
-                    <span class="font-semibold">: ${r.total_realisasi} transaksi</span>
+                    <span class="font-semibold">: ${escapeHtml(r.total_realisasi)} transaksi</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
                     <span class="text-gray-500">Kendala</span>
-                    <span class="font-semibold text-${r.kendala_aktif > 0 ? 'red' : 'green'}-700">: ${r.kendala_aktif} aktif</span>
+                    <span class="font-semibold text-${r.kendala_aktif > 0 ? 'red' : 'green'}-700">: ${escapeHtml(r.kendala_aktif)} aktif</span>
                 </div>
             </div>`;
-        if (window.lucide) lucide.createIcons();
-    }
-
-    // ============================================================
-    // KENDALA DALAM PENGADAAN (3 KOLOM)
-    // ============================================================
-    function renderKendalaPengadaan(data) {
-        const container = document.getElementById('kendala-pengadaan-container');
-        if (!container) return;
-
-        if (!data || !data.items || data.items.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
-
-        const rowsHtml = data.items.map((item, idx) => `
-            <tr class="border-b border-gray-100 last:border-0 hover:bg-red-50/30 transition">
-                <td class="px-4 py-4 text-center align-top w-12">
-                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 text-red-700 text-xs font-bold">
-                        ${idx + 1}
-                    </span>
-                </td>
-                <td class="px-4 py-4 align-top" style="width: 40%;">
-                    <p class="text-xs font-semibold text-gray-800 leading-snug mb-1.5">
-                        ${item.kendala}
-                    </p>
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="inline-block text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                            ${item.kategori}
-                        </span>
-                        ${item.pengadaan_kode && item.pengadaan_kode !== '-' ? `
-                            <span class="inline-block text-[10px] font-mono font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                                ${item.pengadaan_kode}
-                            </span>
-                        ` : ''}
-                    </div>
-                </td>
-                <td class="px-4 py-4 align-top" style="width: 30%;">
-                    ${item.dampak ? `
-                        <p class="text-xs text-gray-700 leading-relaxed">${item.dampak}</p>
-                    ` : `
-                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
-                    `}
-                </td>
-                <td class="px-4 py-4 align-top" style="width: 30%;">
-                    ${item.tindak_lanjut ? `
-                        <p class="text-xs text-gray-700 leading-relaxed">${item.tindak_lanjut}</p>
-                    ` : `
-                        <p class="text-xs text-gray-400 italic">Belum diisi</p>
-                    `}
-                </td>
-            </tr>
-        `).join('');
-
-        container.innerHTML = `
-            <div class="bg-white rounded-2xl border-2 border-red-200 shadow-sm overflow-hidden">
-                <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-4 flex items-center gap-3 border-b border-red-200/60">
-                    <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-bold text-red-900">
-                            ${data.title || 'Kendala dalam Pengadaan'}
-                        </h3>
-                        <p class="text-[11px] text-red-700 mt-0.5">
-                            ${data.subtitle || 'Kendala tahapan pengadaan, dampak, dan tindak lanjut'}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-red-50/60 text-red-900 text-[10px] uppercase">
-                            <tr>
-                                <th class="px-4 py-3 font-semibold text-center w-12">No</th>
-                                <th class="px-4 py-3 font-semibold text-left" style="width: 40%;">
-                                    Kendala / Risiko
-                                </th>
-                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
-                                    Dampak Potensial
-                                </th>
-                                <th class="px-4 py-3 font-semibold text-left" style="width: 30%;">
-                                    Tindak Lanjut / Mitigasi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>${rowsHtml}</tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-
         if (window.lucide) lucide.createIcons();
     }
 

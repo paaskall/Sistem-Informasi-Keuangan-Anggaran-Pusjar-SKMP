@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Pengadaan Detail
+// Versi aman XSS — semua data di-escape
 // ============================================================
 
 (function () {
@@ -56,7 +57,7 @@
             'Batal': 'bg-red-100 text-red-700',
         };
         const cls = map[s] || 'bg-gray-100 text-gray-700';
-        return `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${cls}">${s}</span>`;
+        return `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${cls}">${escapeHtml(s)}</span>`;
     }
 
     async function loadData() {
@@ -84,16 +85,16 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-3 flex-wrap mb-2">
                             <span class="font-mono text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1 rounded-lg">
-                                ${p.kode}
+                                ${escapeHtml(p.kode)}
                             </span>
                             ${statusBadge(p.status)}
                         </div>
-                        <h1 class="text-2xl font-bold text-gray-800 mb-2">${p.nama}</h1>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">${escapeHtml(p.nama)}</h1>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2 text-sm mt-4">
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i data-lucide="tag" class="w-4 h-4 text-gray-400"></i>
                                 <span class="text-xs text-gray-500">Jenis:</span>
-                                <b class="text-gray-800">${p.jenis}</b>
+                                <b class="text-gray-800">${escapeHtml(p.jenis)}</b>
                             </div>
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i data-lucide="banknote" class="w-4 h-4 text-gray-400"></i>
@@ -103,12 +104,12 @@
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
                                 <span class="text-xs text-gray-500">Penyedia:</span>
-                                <b class="text-gray-800">${p.penyedia || '-'}</b>
+                                <b class="text-gray-800">${escapeHtml(p.penyedia || '-')}</b>
                             </div>
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
                                 <span class="text-xs text-gray-500">Periode:</span>
-                                <b class="text-gray-800">${formatTanggal(p.tanggal_mulai)} - ${formatTanggal(p.tanggal_selesai)}</b>
+                                <b class="text-gray-800">${escapeHtml(formatTanggal(p.tanggal_mulai))} - ${escapeHtml(formatTanggal(p.tanggal_selesai))}</b>
                             </div>
                         </div>
                     </div>
@@ -122,7 +123,6 @@
     function renderProgress() {
         const p = pengadaan;
         const container = document.getElementById('progress-card');
-        const fillClass = progressColor(p.progress);
 
         container.innerHTML = `
             <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-lg shadow-blue-200/50">
@@ -176,23 +176,21 @@
         container.innerHTML = list.map((t, i) => `
             <div class="tahapan-row ${t.selesai ? 'selesai' : ''} p-4" data-tahapan-id="${t.id}">
                 <div class="flex items-start gap-3">
-                    <!-- Checkbox -->
                     <input type="checkbox" class="tahapan-checkbox mt-1"
                         ${t.selesai ? 'checked' : ''}
                         onchange="toggleTahapan(${t.id}, this.checked)" />
 
-                    <!-- Content -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between gap-3 mb-1">
                             <div class="min-w-0 flex-1">
                                 <p class="tahapan-nama font-semibold text-gray-800">
                                     <span class="text-xs text-gray-400 font-mono mr-1">${i + 1}.</span>
-                                    ${t.nama}
+                                    ${escapeHtml(t.nama)}
                                 </p>
                                 ${t.selesai && t.tanggal_selesai ? `
                                     <p class="text-[11px] text-green-700 flex items-center gap-1 mt-1">
                                         <i data-lucide="check-circle" class="w-3 h-3"></i>
-                                        Selesai: ${formatTanggal(t.tanggal_selesai)}
+                                        Selesai: ${escapeHtml(formatTanggal(t.tanggal_selesai))}
                                     </p>
                                 ` : ''}
                             </div>
@@ -228,12 +226,12 @@
                                                 ${t.kendala_selesai ? 'Kendala Sudah Diatasi' : 'Kendala'}
                                             </p>
                                             <p class="text-[11px] ${t.kendala_selesai ? 'text-green-800 line-through' : 'text-amber-800'} mt-0.5">
-                                                ${t.kendala}
+                                                ${escapeHtml(t.kendala)}
                                             </p>
                                             ${t.kendala_selesai && t.kendala_selesai_at ? `
                                                 <p class="text-[10px] text-green-700 mt-1 flex items-center gap-1">
                                                     <i data-lucide="calendar-check" class="w-3 h-3"></i>
-                                                    Diatasi: ${formatTanggal(t.kendala_selesai_at)}
+                                                    Diatasi: ${escapeHtml(formatTanggal(t.kendala_selesai_at))}
                                                 </p>
                                             ` : ''}
                                         </div>
@@ -270,7 +268,7 @@
             renderTahapan();
         } else {
             toastError(res.data.message || 'Gagal toggle tahapan');
-            loadData(); // refresh
+            loadData();
         }
     };
 
@@ -293,7 +291,7 @@
         Swal.fire({
             title: 'Hapus Tahapan?',
             html: `<div class="text-sm text-gray-600 text-left">
-                <p><b>${t.nama}</b> akan dihapus permanen.</p>
+                <p><b>${escapeHtml(t.nama)}</b> akan dihapus permanen.</p>
             </div>`,
             icon: 'warning',
             showCancelButton: true,
@@ -328,22 +326,22 @@
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Nama Tahapan <span class="text-red-500">*</span></label>
                 <input id="f-tahapan-nama" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    value="${t ? t.nama : ''}" placeholder="Contoh: Perencanaan" />
+                    value="${t ? escapeHtml(t.nama) : ''}" placeholder="Contoh: Perencanaan" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Kendala (opsional)</label>
                 <textarea id="f-tahapan-kendala" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    placeholder="Contoh: Vendor tidak memenuhi syarat">${t && t.kendala ? t.kendala : ''}</textarea>
+                    placeholder="Contoh: Vendor tidak memenuhi syarat">${t && t.kendala ? escapeHtml(t.kendala) : ''}</textarea>
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Dampak Potensial (opsional)</label>
                 <textarea id="f-tahapan-dampak" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    placeholder="Contoh: Jadwal pengadaan mundur">${t && t.dampak ? t.dampak : ''}</textarea>
+                    placeholder="Contoh: Jadwal pengadaan mundur">${t && t.dampak ? escapeHtml(t.dampak) : ''}</textarea>
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tindak Lanjut / Mitigasi (opsional)</label>
                 <textarea id="f-tahapan-tindak" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    placeholder="Contoh: Percepat pengumuman ulang">${t && t.tindak_lanjut ? t.tindak_lanjut : ''}</textarea>
+                    placeholder="Contoh: Percepat pengumuman ulang">${t && t.tindak_lanjut ? escapeHtml(t.tindak_lanjut) : ''}</textarea>
             </div>
             ${t ? `
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -358,20 +356,6 @@
                 </div>
             ` : ''}
         </div>`;
-    }
-
-    function collectTahapanForm() {
-        const data = {
-            nama: document.getElementById('f-tahapan-nama').value.trim(),
-            kendala: document.getElementById('f-tahapan-kendala').value.trim() || null,
-            dampak: document.getElementById('f-tahapan-dampak').value.trim() || null,
-            tindak_lanjut: document.getElementById('f-tahapan-tindak').value.trim() || null,
-        };
-        const selesaiEl = document.getElementById('f-tahapan-selesai');
-        if (selesaiEl) {
-            data.selesai = selesaiEl.checked;
-        }
-        return data;
     }
 
     function collectTahapanForm() {
@@ -471,12 +455,8 @@
         });
     };
 
-    // ============================================================
-    // TOGGLE KENDALA (SUDAH DIATASI / BELUM)
-    // ============================================================
     window.toggleKendala = async function (tahapanId) {
         const url = buildRoute(DATA.routes.toggleKendala, tahapanId, '__TID__');
-
         const res = await apiCall('PATCH', url);
 
         if (res.ok) {

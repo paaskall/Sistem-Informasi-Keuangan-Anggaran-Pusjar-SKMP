@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Realisasi Viewer (Read-Only)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -118,8 +119,8 @@
                                             <i data-lucide="receipt" class="w-3 h-3"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-medium text-gray-800 truncate">${kom ? kom.nama : '-'}</p>
-                                            <p class="text-[9px] text-gray-400">${kom ? kom.kode : '-'}</p>
+                                            <p class="text-xs font-medium text-gray-800 truncate">${escapeHtml(kom ? kom.nama : '-')}</p>
+                                            <p class="text-[9px] text-gray-400 font-mono">${escapeHtml(kom ? kom.kode : '-')}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -134,8 +135,8 @@
                                 <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="git-branch" class="w-3 h-3"></i>
                                 </div>
-                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${sub ? sub.kode : '-'}</span>
-                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${sub ? sub.nama : 'Tanpa Sub-Kegiatan'}</span>
+                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(sub ? sub.kode : '-')}</span>
+                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${escapeHtml(sub ? sub.nama : 'Tanpa Sub-Kegiatan')}</span>
                                 <span class="text-xs font-bold text-indigo-700 whitespace-nowrap">${rp(subTotal)}</span>
                                 <span class="text-[10px] text-gray-500 w-12 text-right">${subPct}%</span>
                             </div>
@@ -153,8 +154,8 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${prog ? prog.kode : '???'}</span>
-                                    <span class="text-xs font-bold text-blue-900 truncate">${prog ? prog.nama : 'Tidak diketahui'}</span>
+                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(prog ? prog.kode : '???')}</span>
+                                    <span class="text-xs font-bold text-blue-900 truncate">${escapeHtml(prog ? prog.nama : 'Tidak diketahui')}</span>
                                 </div>
                             </div>
                             <span class="text-sm font-bold text-blue-800 whitespace-nowrap">${rp(progTotal)}</span>
@@ -180,15 +181,15 @@
                                     <div class="flex items-start justify-between gap-2 mb-1.5">
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                                                ${k.kategori ? k.kategori.nama : '-'}
+                                                ${escapeHtml(k.kategori ? k.kategori.nama : '-')}
                                             </span>
                                             <span class="text-[10px] font-bold ${kStatusColor} px-2 py-0.5 rounded-full">
-                                                ${k.status}
+                                                ${escapeHtml(k.status)}
                                             </span>
                                         </div>
-                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">${formatTanggal(k.tanggal)}</span>
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">${escapeHtml(formatTanggal(k.tanggal))}</span>
                                     </div>
-                                    <p class="text-xs text-gray-800">${k.deskripsi}</p>
+                                    <p class="text-xs text-gray-800">${escapeHtml(k.deskripsi)}</p>
                                 </div>`;
                         }).join('')}
                     </div>
@@ -202,11 +203,11 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-semibold text-gray-800">${r.bulan_nama}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(r.bulan_nama)}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 flex-shrink-0 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-center text-gray-600 text-xs whitespace-nowrap">${formatTanggal(r.tanggal)}</td>
+                    <td class="px-5 py-4 text-center text-gray-600 text-xs whitespace-nowrap">${escapeHtml(formatTanggal(r.tanggal))}</td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex flex-col items-center gap-1">
                             <span class="inline-flex items-center gap-1.5 text-xs bg-purple-50 text-purple-700 font-semibold px-3 py-1.5 rounded-full">
@@ -241,7 +242,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-emerald-700"></i>
                                         <span class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                                            Rincian Realisasi - ${r.bulan_nama} ${r.tahun}
+                                            Rincian Realisasi - ${escapeHtml(r.bulan_nama)} ${escapeHtml(r.tahun)}
                                         </span>
                                     </div>
                                     <span class="text-xs text-gray-500">Total: ${rp(r.nominal)}</span>
@@ -250,7 +251,7 @@
                                 ${r.keterangan ? `
                                     <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg text-xs text-blue-900 flex items-start gap-2">
                                         <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
-                                        <span><b>Keterangan:</b> ${r.keterangan}</span>
+                                        <span><b>Keterangan:</b> ${escapeHtml(r.keterangan)}</span>
                                     </div>
                                 ` : ''}
                                 ${kendalaBlockHtml}

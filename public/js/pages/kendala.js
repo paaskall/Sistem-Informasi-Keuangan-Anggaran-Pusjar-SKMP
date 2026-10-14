@@ -36,7 +36,7 @@
 
     function badge(text) {
         const cls = text === 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700';
-        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${text}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHtml(text)}</span>`;
     }
 
     async function loadData() {
@@ -78,7 +78,7 @@
         const sel = document.getElementById('filter-kategori');
         const current = sel.value;
         sel.innerHTML = '<option value="semua">Semua</option>' +
-            kategoris.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
+            kategoris.map(k => `<option value="${escapeHtml(k.id)}">${escapeHtml(k.nama)}</option>`).join('');
         sel.value = current;
     }
 
@@ -92,29 +92,32 @@
         }
 
         tbody.innerHTML = kendalas.map(k => {
-            const katNama = k.kategori_kendala ? k.kategori_kendala.nama : '-';
+            // ✅ ESCAPE semua data dari server
+            const katNama = k.kategori_kendala ? escapeHtml(k.kategori_kendala.nama) : '-';
+            const deskripsi = escapeHtml(k.deskripsi);
+            const status = escapeHtml(k.status);
             
             // Build "Terkait" info
             let terkaitHtml = '<span class="text-[10px] text-gray-400 italic">Umum</span>';
             if (k.target) {
                 const bulanNama = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'][k.target.bulan - 1] || '-';
-                const targetInfo = `<span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">${bulanNama} ${k.target.tahun}</span>`;
+                const targetInfo = `<span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">${escapeHtml(bulanNama)} ${escapeHtml(k.target.tahun)}</span>`;
                 const komInfo = k.komponen_belanja 
-                    ? `<span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">${k.komponen_belanja.kode}</span>` 
+                    ? `<span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">${escapeHtml(k.komponen_belanja.kode)}</span>` 
                     : '';
                 terkaitHtml = `<div class="flex flex-wrap items-center gap-1">${targetInfo}${komInfo ? ' · ' + komInfo : ''}</div>`;
             }
             
             return `
                 <tr class="hover:bg-blue-50/40 transition">
-                    <td class="px-4 py-3 text-gray-700 text-xs whitespace-nowrap">${formatTanggal(k.tanggal)}</td>
+                    <td class="px-4 py-3 text-gray-700 text-xs whitespace-nowrap">${escapeHtml(formatTanggal(k.tanggal))}</td>
                     <td class="px-4 py-3">
                         <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
                             ${katNama}
                         </span>
                     </td>
                     <td class="px-4 py-3">${terkaitHtml}</td>
-                    <td class="px-4 py-3 text-gray-800">${k.deskripsi}</td>
+                    <td class="px-4 py-3 text-gray-800">${deskripsi}</td>
                     <td class="px-4 py-3">${badge(k.status)}</td>
                     <td class="px-4 py-3 text-right">
                         <button type="button" onclick="editKendala(${k.id})" class="text-blue-700 hover:bg-blue-100 px-2 py-1 rounded transition" title="Edit">
@@ -132,30 +135,31 @@
 
     function buildForm(k) {
         const today = new Date().toISOString().substring(0, 10);
+        // ✅ escapeHtml untuk value di form (cegah XSS di form)
         return `<div class="text-left space-y-3 text-sm mt-2">
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tanggal <span class="text-red-500">*</span></label>
                 <input id="f-tanggal" type="date" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    value="${k ? k.tanggal.substring(0,10) : today}" />
+                    value="${k ? escapeHtml(k.tanggal.substring(0,10)) : today}" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Kategori <span class="text-red-500">*</span></label>
                 <select id="f-kategori" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
                     <option value="">- Pilih Kategori -</option>
-                    ${kategoris.map(x => `<option value="${x.id}" ${k && k.kategori_kendala_id === x.id ? 'selected' : ''}>${x.nama}</option>`).join('')}
+                    ${kategoris.map(x => `<option value="${escapeHtml(x.id)}" ${k && k.kategori_kendala_id === x.id ? 'selected' : ''}>${escapeHtml(x.nama)}</option>`).join('')}
                 </select>
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Deskripsi <span class="text-red-500">*</span></label>
-                <textarea id="f-deskripsi" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">${k ? k.deskripsi : ''}</textarea>
+                <textarea id="f-deskripsi" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">${k ? escapeHtml(k.deskripsi) : ''}</textarea>
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Dampak</label>
-                <input id="f-dampak" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" value="${k ? (k.dampak || '') : ''}" />
+                <input id="f-dampak" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" value="${k ? escapeHtml(k.dampak || '') : ''}" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tindak Lanjut</label>
-                <input id="f-tindak" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" value="${k ? (k.tindak_lanjut || '') : ''}" />
+                <input id="f-tindak" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" value="${k ? escapeHtml(k.tindak_lanjut || '') : ''}" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Status <span class="text-red-500">*</span></label>
@@ -258,7 +262,7 @@
         if (!k) return;
         Swal.fire({
             title: 'Hapus Kendala?',
-            html: `<div class="text-sm text-gray-600"><b>${k.deskripsi}</b> akan dihapus.</div>`,
+            html: `<div class="text-sm text-gray-600"><b>${escapeHtml(k.deskripsi)}</b> akan dihapus.</div>`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Ya, Hapus',

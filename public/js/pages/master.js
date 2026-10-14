@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Master Data Page
+// Versi aman XSS — semua data di-escape sebelum innerHTML
 // ============================================================
 
 (function () {
@@ -37,12 +38,11 @@
     // ============ RENDER TABLE HEAD ============
     function renderTableHead() {
         const conf = DATA.tabConfig[DATA.activeTab];
-        const cols = ['id', ...conf.fields.map(f => f.key)];
         const thead = document.getElementById('table-head');
 
         let html = `<th class="text-center px-4 py-3 font-semibold w-16">ID</th>`;
         conf.fields.forEach(f => {
-            html += `<th class="text-left px-4 py-3 font-semibold">${f.label}</th>`;
+            html += `<th class="text-left px-4 py-3 font-semibold">${escapeHtml(f.label)}</th>`;
         });
         html += `<th class="text-center px-4 py-3 font-semibold w-32">Aksi</th>`;
         thead.innerHTML = html;
@@ -58,7 +58,7 @@
                 <tr>
                     <td colspan="${conf.fields.length + 2}" class="text-center py-12 text-gray-400">
                         <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-                        <p class="text-sm">Belum ada data ${conf.label}</p>
+                        <p class="text-sm">Belum ada data ${escapeHtml(conf.label)}</p>
                         <p class="text-xs mt-1">Klik "Tambah" untuk memulai</p>
                     </td>
                 </tr>`;
@@ -69,7 +69,7 @@
         tbody.innerHTML = DATA.items.map(item => {
             let cells = `<td class="px-4 py-3 text-center">
                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold">
-                    ${item.id}
+                    ${escapeHtml(item.id)}
                 </span>
             </td>`;
 
@@ -79,7 +79,7 @@
                 if (f.key === 'kode') {
                     cells += `<td class="px-4 py-3">
                         <span class="inline-block font-mono text-[11px] font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                            ${value || '-'}
+                            ${escapeHtml(value || '-')}
                         </span>
                     </td>`;
                 } else if (f.type === 'select' && f.source) {
@@ -92,8 +92,8 @@
                                 <i data-lucide="folder" class="w-3 h-3"></i>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-xs font-medium text-gray-800 truncate">${label}</p>
-                                ${prefix ? `<p class="text-[10px] text-gray-400 font-mono">${prefix}</p>` : ''}
+                                <p class="text-xs font-medium text-gray-800 truncate">${escapeHtml(label)}</p>
+                                ${prefix ? `<p class="text-[10px] text-gray-400 font-mono">${escapeHtml(prefix)}</p>` : ''}
                             </div>
                         </div>
                     </td>`;
@@ -102,7 +102,7 @@
                         ? 'font-medium text-gray-800'
                         : (f.mono ? 'font-mono text-xs text-gray-600' : 'text-gray-600');
                     cells += `<td class="px-4 py-3">
-                        <span class="${cls}">${value || '-'}</span>
+                        <span class="${cls}">${escapeHtml(value || '-')}</span>
                     </td>`;
                 }
             });
@@ -128,7 +128,7 @@
 
     // ============ SWITCH TAB ============
     window.switchTab = async function (tab) {
-        // Update URL (biar bisa refresh tetap di tab yang sama)
+        // Update URL
         const url = new URL(window.location);
         url.searchParams.set('tab', tab);
         window.history.pushState({}, '', url);
@@ -183,13 +183,13 @@
                     return `
                         <div>
                             <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
-                                ${f.label} ${f.required ? '<span class="text-red-500">*</span>' : ''}
+                                ${escapeHtml(f.label)} ${f.required ? '<span class="text-red-500">*</span>' : ''}
                             </label>
                             <select id="f-${f.key}" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="">- Pilih ${f.label} -</option>
+                                <option value="">- Pilih ${escapeHtml(f.label)} -</option>
                                 ${options.map(o => `
-                                    <option value="${o[f.source_value]}" ${value == o[f.source_value] ? 'selected' : ''}>
-                                        ${o[f.source_prefix] ? o[f.source_prefix] + ' - ' : ''}${o[f.source_label]}
+                                    <option value="${escapeHtml(o[f.source_value])}" ${value == o[f.source_value] ? 'selected' : ''}>
+                                        ${o[f.source_prefix] ? escapeHtml(o[f.source_prefix]) + ' - ' : ''}${escapeHtml(o[f.source_label])}
                                     </option>
                                 `).join('')}
                             </select>
@@ -199,12 +199,12 @@
                 return `
                     <div>
                         <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
-                            ${f.label} ${f.required ? '<span class="text-red-500">*</span>' : ''}
+                            ${escapeHtml(f.label)} ${f.required ? '<span class="text-red-500">*</span>' : ''}
                         </label>
                         <input id="f-${f.key}" type="text"
                             class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 ${f.mono ? 'font-mono' : ''}"
-                            value="${value}"
-                            placeholder="${f.placeholder || ''}" />
+                            value="${escapeHtml(value)}"
+                            placeholder="${escapeHtml(f.placeholder || '')}" />
                     </div>`;
             }).join('')}
         </div>`;
@@ -337,7 +337,7 @@
         Swal.fire({
             title: `Hapus ${conf.label}?`,
             html: `<div class="text-sm text-gray-600">
-                <b>${label}</b> akan dihapus (soft delete).
+                <b>${escapeHtml(label)}</b> akan dihapus (soft delete).
             </div>`,
             icon: 'warning',
             showCancelButton: true,

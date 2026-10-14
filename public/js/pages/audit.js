@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Audit Trail (with Pagination)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -38,7 +39,7 @@
             RESTORE: 'bg-purple-100 text-purple-700',
         };
         const cls = map[action] || 'bg-gray-100 text-gray-700';
-        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${action}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHtml(action)}</span>`;
     }
 
     function formatDate(s) {
@@ -67,19 +68,19 @@
         tbody.innerHTML = logs.map(l => `
             <tr class="hover:bg-blue-50/40 transition cursor-pointer" onclick="showDetail(${l.id})">
                 <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
-                    <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i>${formatDate(l.created_at)}
+                    <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i>${escapeHtml(formatDate(l.created_at))}
                 </td>
                 <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
-                            ${(l.user_name || 'S').charAt(0)}
+                            ${escapeHtml((l.user_name || 'S').charAt(0))}
                         </div>
-                        <span class="text-sm font-medium text-gray-800">${l.user_name}</span>
+                        <span class="text-sm font-medium text-gray-800">${escapeHtml(l.user_name)}</span>
                     </div>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-600">${l.module}</td>
+                <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(l.module)}</td>
                 <td class="px-4 py-3">${badge(l.action)}</td>
-                <td class="px-4 py-3 text-xs font-mono text-gray-600">${l.record_id}</td>
+                <td class="px-4 py-3 text-xs font-mono text-gray-600">${escapeHtml(l.record_id)}</td>
                 <td class="px-4 py-3 text-right">
                     <i data-lucide="eye" class="w-4 h-4 text-blue-700 inline"></i>
                 </td>
@@ -101,10 +102,8 @@
             return;
         }
 
-        // Info text
-        const infoText = `Menampilkan <b>${p.from}</b> - <b>${p.to}</b> dari <b>${p.total}</b> log`;
+        const infoText = `Menampilkan <b>${escapeHtml(p.from)}</b> - <b>${escapeHtml(p.to)}</b> dari <b>${escapeHtml(p.total)}</b> log`;
 
-        // Hitung range halaman yang ditampilkan (max 7 tombol)
         const pages = [];
         const maxVisible = 7;
         let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -118,7 +117,6 @@
             pages.push(i);
         }
 
-        // Tombol Prev
         const prevBtn = currentPage > 1
             ? `<button type="button" onclick="goToPage(${currentPage - 1})"
                 class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50">
@@ -128,7 +126,6 @@
                 <i data-lucide="chevron-left" class="w-4 h-4"></i> Prev
                </span>`;
 
-        // Tombol Next
         const nextBtn = currentPage < totalPages
             ? `<button type="button" onclick="goToPage(${currentPage + 1})"
                 class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
@@ -138,7 +135,6 @@
                 Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
                </span>`;
 
-        // Tombol halaman
         const pageButtons = pages.map(pg => {
             const isActive = pg === currentPage;
             return `<button type="button" onclick="goToPage(${pg})"
@@ -146,11 +142,10 @@
                 ${isActive
                     ? 'bg-blue-700 text-white shadow-md shadow-blue-200'
                     : 'text-gray-600 hover:bg-gray-100'}">
-                ${pg}
+                ${escapeHtml(pg)}
             </button>`;
         }).join('');
 
-        // Ellipsis kalau ada yang disembunyikan
         let startEllipsis = start > 1 ? `<span class="px-1 text-gray-400">...</span>` : '';
         let endEllipsis = end < totalPages ? `<span class="px-1 text-gray-400">...</span>` : '';
 
@@ -194,8 +189,8 @@
         if (res.ok) {
             renderTable(res.data.logs);
             if (res.data.pagination) {
-                    renderPagination(res.data.pagination);
-                }
+                renderPagination(res.data.pagination);
+            }
             const pag = res.data.pagination || { total: 0 };
             document.getElementById('log-count').textContent = `${pag.total} log ditampilkan`;
             
@@ -206,9 +201,9 @@
             const currentMod = modSelect.value;
 
             userSelect.innerHTML = '<option value="semua">Semua</option>' +
-                (res.data.filters.users || []).map(u => `<option value="${u}">${u}</option>`).join('');
+                (res.data.filters.users || []).map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
             modSelect.innerHTML = '<option value="semua">Semua</option>' +
-                (res.data.filters.modules || []).map(m => `<option value="${m}">${m}</option>`).join('');
+                (res.data.filters.modules || []).map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
 
             userSelect.value = currentUser;
             modSelect.value = currentMod;
@@ -254,15 +249,15 @@
             html: `
                 <div class="text-left text-sm">
                     <div class="mb-3 text-gray-600 text-xs">
-                        ${formatDate(l.created_at)} - <b>${l.user_name}</b> (${l.module}) - <span class="font-mono">${l.record_id}</span>
+                        ${escapeHtml(formatDate(l.created_at))} - <b>${escapeHtml(l.user_name)}</b> (${escapeHtml(l.module)}) - <span class="font-mono">${escapeHtml(l.record_id)}</span>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 font-mono text-xs space-y-2">
-                        <div><span class="text-red-700 font-bold">BEFORE</span> : ${l.before || '-'}</div>
-                        <div><span class="text-green-700 font-bold">AFTER</span> &nbsp;: ${l.after || '-'}</div>
+                        <div><span class="text-red-700 font-bold">BEFORE</span> : ${escapeHtml(l.before || '-')}</div>
+                        <div><span class="text-green-700 font-bold">AFTER</span> &nbsp;: ${escapeHtml(l.after || '-')}</div>
                     </div>
                     <div class="mt-3 text-[11px] text-gray-500">
-                        <div>IP: ${l.ip || '-'}</div>
-                        <div>Action: ${l.action}</div>
+                        <div>IP: ${escapeHtml(l.ip || '-')}</div>
+                        <div>Action: ${escapeHtml(l.action)}</div>
                     </div>
                 </div>
             `,

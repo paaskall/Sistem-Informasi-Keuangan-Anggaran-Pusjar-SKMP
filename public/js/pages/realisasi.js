@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Realisasi Page (with Kendala + Tahun Lock)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -125,7 +126,7 @@
                 <tr>
                     <td colspan="6" class="text-center py-10 text-gray-400">
                         <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-                        <p class="text-sm">Belum ada realisasi untuk tahun ${currentTahun}</p>
+                        <p class="text-sm">Belum ada realisasi untuk tahun ${escapeHtml(currentTahun)}</p>
                         <p class="text-xs mt-1">Klik "Input Realisasi" untuk memulai</p>
                     </td>
                 </tr>`;
@@ -183,8 +184,8 @@
                                             <i data-lucide="receipt" class="w-3 h-3"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-medium text-gray-800 truncate">${kom ? kom.nama : '-'}</p>
-                                            <p class="text-[9px] text-gray-400 font-mono">${kom ? kom.kode : '-'}</p>
+                                            <p class="text-xs font-medium text-gray-800 truncate">${escapeHtml(kom ? kom.nama : '-')}</p>
+                                            <p class="text-[9px] text-gray-400 font-mono">${escapeHtml(kom ? kom.kode : '-')}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -199,8 +200,8 @@
                                 <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="git-branch" class="w-3 h-3"></i>
                                 </div>
-                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${sub ? sub.kode : '-'}</span>
-                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${sub ? sub.nama : 'Tanpa Sub-Kegiatan'}</span>
+                                <span class="text-[10px] font-mono font-bold text-indigo-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(sub ? sub.kode : '-')}</span>
+                                <span class="text-xs font-semibold text-gray-800 flex-1 truncate">${escapeHtml(sub ? sub.nama : 'Tanpa Sub-Kegiatan')}</span>
                                 <span class="text-xs font-bold text-indigo-700 whitespace-nowrap">${rp(subTotal)}</span>
                                 <span class="text-[10px] text-gray-500 w-12 text-right">${subPct}%</span>
                             </div>
@@ -218,8 +219,8 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${prog ? prog.kode : '???'}</span>
-                                    <span class="text-xs font-bold text-blue-900 truncate">${prog ? prog.nama : 'Tidak diketahui'}</span>
+                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded">${escapeHtml(prog ? prog.kode : '???')}</span>
+                                    <span class="text-xs font-bold text-blue-900 truncate">${escapeHtml(prog ? prog.nama : 'Tidak diketahui')}</span>
                                 </div>
                             </div>
                             <span class="text-sm font-bold text-blue-800 whitespace-nowrap">${rp(progTotal)}</span>
@@ -245,22 +246,22 @@
                                     <div class="flex items-start justify-between gap-2 mb-1.5">
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                                                ${k.kategori ? k.kategori.nama : '-'}
+                                                ${escapeHtml(k.kategori ? k.kategori.nama : '-')}
                                             </span>
                                             ${k.komponen_belanja ? `
                                                 <span class="text-[10px] font-mono bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                                                    ${k.komponen_belanja.kode}
+                                                    ${escapeHtml(k.komponen_belanja.kode)}
                                                 </span>
                                             ` : ''}
                                             <span class="text-[10px] font-bold ${kStatusColor} px-2 py-0.5 rounded-full">
-                                                ${k.status}
+                                                ${escapeHtml(k.status)}
                                             </span>
                                         </div>
-                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">${formatTanggal(k.tanggal)}</span>
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">${escapeHtml(formatTanggal(k.tanggal))}</span>
                                     </div>
-                                    <p class="text-xs text-gray-800 mb-1">${k.deskripsi}</p>
-                                    ${k.dampak ? `<p class="text-[10px] text-red-600"><b>Dampak:</b> ${k.dampak}</p>` : ''}
-                                    ${k.tindak_lanjut ? `<p class="text-[10px] text-blue-600"><b>Tindak Lanjut:</b> ${k.tindak_lanjut}</p>` : ''}
+                                    <p class="text-xs text-gray-800 mb-1">${escapeHtml(k.deskripsi)}</p>
+                                    ${k.dampak ? `<p class="text-[10px] text-red-600"><b>Dampak:</b> ${escapeHtml(k.dampak)}</p>` : ''}
+                                    ${k.tindak_lanjut ? `<p class="text-[10px] text-blue-600"><b>Tindak Lanjut:</b> ${escapeHtml(k.tindak_lanjut)}</p>` : ''}
                                 </div>`;
                         }).join('')}
                     </div>
@@ -274,11 +275,11 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-semibold text-gray-800">${r.bulan_nama}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(r.bulan_nama)}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 flex-shrink-0 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-center text-gray-600 text-xs whitespace-nowrap">${formatTanggal(r.tanggal)}</td>
+                    <td class="px-5 py-4 text-center text-gray-600 text-xs whitespace-nowrap">${escapeHtml(formatTanggal(r.tanggal))}</td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex flex-col items-center gap-1">
                             <span class="inline-flex items-center gap-1.5 text-xs bg-purple-50 text-purple-700 font-semibold px-3 py-1.5 rounded-full">
@@ -329,7 +330,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-emerald-700"></i>
                                         <span class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                                            Rincian Realisasi - ${r.bulan_nama} ${r.tahun}
+                                            Rincian Realisasi - ${escapeHtml(r.bulan_nama)} ${escapeHtml(r.tahun)}
                                         </span>
                                     </div>
                                     <span class="text-xs text-gray-500">Total: ${rp(r.nominal)}</span>
@@ -338,7 +339,7 @@
                                 ${r.keterangan ? `
                                     <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg text-xs text-blue-900 flex items-start gap-2">
                                         <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
-                                        <span><b>Keterangan:</b> ${r.keterangan}</span>
+                                        <span><b>Keterangan:</b> ${escapeHtml(r.keterangan)}</span>
                                     </div>
                                 ` : ''}
                                 ${kendalaBlockHtml}
@@ -401,10 +402,10 @@
                     <select id="f-target" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
                         ${realisasi ? 'disabled' : ''}>
                         ${realisasi
-                            ? `<option value="${realisasi.target_id}" selected>${realisasi.bulan_nama} ${realisasi.tahun}</option>`
+                            ? `<option value="${realisasi.target_id}" selected>${escapeHtml(realisasi.bulan_nama)} ${escapeHtml(realisasi.tahun)}</option>`
                             : availableTargetsList.map(t => `
                                 <option value="${t.id}" ${selectedTargetId == t.id ? 'selected' : ''}>
-                                    ${t.bulan_nama} ${t.tahun} - Target ${rp(t.total)}
+                                    ${escapeHtml(t.bulan_nama)} ${escapeHtml(t.tahun)} - Target ${rp(t.total)}
                                 </option>
                             `).join('')}
                     </select>
@@ -414,7 +415,7 @@
                         Tanggal Realisasi <span class="text-red-500">*</span>
                     </label>
                     <input id="f-tanggal" type="date" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                        value="${realisasi ? realisasi.tanggal : today}" />
+                        value="${realisasi ? escapeHtml(realisasi.tanggal) : today}" />
                 </div>
             </div>
         `;
@@ -440,8 +441,8 @@
                             <i data-lucide="folder" class="w-2.5 h-2.5"></i>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[9px] font-mono text-blue-600 truncate">${prog ? prog.kode : '-'}</p>
-                            <p class="text-[10px] text-gray-700 truncate">${prog ? prog.nama : 'Tidak diketahui'}</p>
+                            <p class="text-[9px] font-mono text-blue-600 truncate">${escapeHtml(prog ? prog.kode : '-')}</p>
+                            <p class="text-[10px] text-gray-700 truncate">${escapeHtml(prog ? prog.nama : 'Tidak diketahui')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 bg-indigo-50 rounded-md px-2 py-1.5">
@@ -449,8 +450,8 @@
                             <i data-lucide="git-branch" class="w-2.5 h-2.5"></i>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[9px] font-mono text-indigo-600 truncate">${sub ? sub.kode : '-'}</p>
-                            <p class="text-[10px] text-gray-700 truncate">${sub ? sub.nama : 'Tanpa Sub'}</p>
+                            <p class="text-[9px] font-mono text-indigo-600 truncate">${escapeHtml(sub ? sub.kode : '-')}</p>
+                            <p class="text-[10px] text-gray-700 truncate">${escapeHtml(sub ? sub.nama : 'Tanpa Sub')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 bg-emerald-50 rounded-md px-2 py-1.5">
@@ -458,8 +459,8 @@
                             <i data-lucide="receipt" class="w-2.5 h-2.5"></i>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[9px] font-mono text-emerald-600 truncate">${kom ? kom.kode : '-'}</p>
-                            <p class="text-[10px] text-gray-700 truncate">${kom ? kom.nama : 'Tidak diketahui'}</p>
+                            <p class="text-[9px] font-mono text-emerald-600 truncate">${escapeHtml(kom ? kom.kode : '-')}</p>
+                            <p class="text-[10px] text-gray-700 truncate">${escapeHtml(kom ? kom.nama : 'Tidak diketahui')}</p>
                         </div>
                     </div>
                 </div>
@@ -517,13 +518,13 @@
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Tanggal <span class="text-red-500">*</span></label>
                         <input type="date" class="k-tanggal w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-amber-500"
-                            value="${k.tanggal}" />
+                            value="${escapeHtml(k.tanggal)}" />
                     </div>
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Kategori <span class="text-red-500">*</span></label>
                         <select class="k-kategori w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-amber-500 bg-white">
                             <option value="">- Pilih Kategori -</option>
-                            ${kategoris.map(x => `<option value="${x.id}" ${k.kategori_kendala_id == x.id ? 'selected' : ''}>${x.nama}</option>`).join('')}
+                            ${kategoris.map(x => `<option value="${escapeHtml(x.id)}" ${k.kategori_kendala_id == x.id ? 'selected' : ''}>${escapeHtml(x.nama)}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -536,7 +537,7 @@
                         <option value="">- Tidak terkait komponen spesifik -</option>
                         ${komponenList.map(tk => {
                             const kom = tk.komponen_belanja;
-                            return `<option value="${tk.komponen_belanja_id}" ${selectedKomponenId == tk.komponen_belanja_id ? 'selected' : ''}>${kom ? kom.kode + ' - ' + kom.nama : '-'}</option>`;
+                            return `<option value="${tk.komponen_belanja_id}" ${selectedKomponenId == tk.komponen_belanja_id ? 'selected' : ''}>${escapeHtml(kom ? kom.kode + ' - ' + kom.nama : '-')}</option>`;
                         }).join('')}
                     </select>
                 </div>
@@ -544,19 +545,19 @@
                 <div class="mb-2">
                     <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Deskripsi <span class="text-red-500">*</span></label>
                     <textarea class="k-deskripsi w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-amber-500" rows="2"
-                        placeholder="Jelaskan kendala yang dihadapi...">${k.deskripsi}</textarea>
+                        placeholder="Jelaskan kendala yang dihadapi...">${escapeHtml(k.deskripsi)}</textarea>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Dampak</label>
                         <input type="text" class="k-dampak w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-amber-500"
-                            value="${k.dampak || ''}" placeholder="Contoh: Menghambat pencairan" />
+                            value="${escapeHtml(k.dampak || '')}" placeholder="Contoh: Menghambat pencairan" />
                     </div>
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase font-semibold block mb-1">Tindak Lanjut</label>
                         <input type="text" class="k-tindak w-full px-2.5 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-amber-500"
-                            value="${k.tindak_lanjut || ''}" placeholder="Contoh: Rapat koordinasi" />
+                            value="${escapeHtml(k.tindak_lanjut || '')}" placeholder="Contoh: Rapat koordinasi" />
                     </div>
                 </div>
 
@@ -654,7 +655,7 @@
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Keterangan (opsional)</label>
                     <textarea id="f-keterangan" rows="2" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                        placeholder="Catatan tambahan...">${realisasi ? (realisasi.keterangan || '') : ''}</textarea>
+                        placeholder="Catatan tambahan...">${realisasi ? escapeHtml(realisasi.keterangan || '') : ''}</textarea>
                 </div>
                 ${buildKendalaSection(realisasi ? realisasi.kendalas : [], targetData ? targetData.details : [])}
             </div>`;
@@ -849,7 +850,7 @@
                                     sel.innerHTML = '<option value="">- Tidak terkait komponen spesifik -</option>' +
                                         td.details.map(d => {
                                             const kom = d.komponen_belanja;
-                                            return `<option value="${d.komponen_belanja_id}">${kom ? kom.kode + ' - ' + kom.nama : '-'}</option>`;
+                                            return `<option value="${d.komponen_belanja_id}">${escapeHtml(kom ? kom.kode + ' - ' + kom.nama : '-')}</option>`;
                                         }).join('');
                                     sel.value = currentVal;
                                 });
@@ -902,9 +903,9 @@
         Swal.fire({
             title: 'Hapus Realisasi?',
             html: `<div class="text-sm text-gray-600">
-                <p>Realisasi <b>${r.bulan_nama} ${r.tahun}</b> akan dihapus.</p>
+                <p>Realisasi <b>${escapeHtml(r.bulan_nama)} ${escapeHtml(r.tahun)}</b> akan dihapus.</p>
                 <div class="bg-gray-50 rounded-lg p-3 text-xs mt-3">
-                    <div class="flex justify-between"><span>Tanggal:</span><b>${formatTanggal(r.tanggal)}</b></div>
+                    <div class="flex justify-between"><span>Tanggal:</span><b>${escapeHtml(formatTanggal(r.tanggal))}</b></div>
                     <div class="flex justify-between"><span>Total:</span><b class="text-emerald-700">${rp(r.nominal)}</b></div>
                     <div class="flex justify-between"><span>Komponen:</span><b>${r.details.length} item</b></div>
                 </div>

@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - PNBP Page (Style Target: Tabel + Accordion)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -117,8 +118,8 @@
                         <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-white font-bold text-base">Total Realisasi Penerimaan PNBP ${p.tahun}</h3>
-                        <p class="text-emerald-100 text-xs mt-0.5">${p.unit || '-'}</p>
+                        <h3 class="text-white font-bold text-base">Total Realisasi Penerimaan PNBP ${escapeHtml(p.tahun)}</h3>
+                        <p class="text-emerald-100 text-xs mt-0.5">${escapeHtml(p.unit || '-')}</p>
                     </div>
                 </div>
 
@@ -167,7 +168,7 @@
         if (window.lucide) lucide.createIcons();
     }
 
-    // ============ TABLE (Style Target) ============
+    // ============ TABLE ============
     function renderTable() {
         const tbody = document.getElementById('pnbp-tbody');
         const tfoot = document.getElementById('pnbp-tfoot');
@@ -178,7 +179,7 @@
                 <tr>
                     <td colspan="5" class="text-center py-10 text-gray-400">
                         <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-                        <p class="text-sm">Belum ada data PNBP untuk tahun ${currentTahun}</p>
+                        <p class="text-sm">Belum ada data PNBP untuk tahun ${escapeHtml(currentTahun)}</p>
                     </td>
                 </tr>`;
             tfoot.innerHTML = '';
@@ -203,15 +204,25 @@
 
                 const icon = kat.has_children ? 'graduation-cap' : 'building-2';
 
+                // ✅ Pakai data-attribute, bukan onclick string interpolation
                 let html = `
                     <tr class="border-b border-gray-100 bg-emerald-50/40 hover:bg-emerald-100/50 transition cursor-pointer"
-                        onclick="event.stopPropagation(); openDetailForm(${kat.id}, '${kat.nama.replace(/'/g, "\\'")}', ${b.bulan}, ${kat.target}, ${kat.realisasi}, 0, 0, null, false)">
+                        data-detail-id="${kat.id}"
+                        data-nama="${escapeHtml(kat.nama)}"
+                        data-bulan="${b.bulan}"
+                        data-target="${kat.target}"
+                        data-realisasi="${kat.realisasi}"
+                        data-peserta-target="0"
+                        data-peserta-realisasi="0"
+                        data-keterangan=""
+                        data-is-child="false"
+                        onclick="event.stopPropagation(); openDetailFormFromRow(this)">
                         <td class="py-3 pl-4 pr-3 text-left" colspan="1">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
                                 </div>
-                                <span class="text-xs font-bold text-gray-800">${kat.nama}</span>
+                                <span class="text-xs font-bold text-gray-800">${escapeHtml(kat.nama)}</span>
                                 ${kat.has_children ? `<span class="text-[9px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full">${kat.children.length} sub</span>` : ''}
                             </div>
                         </td>
@@ -239,11 +250,20 @@
 
                         return `
                             <tr class="border-b border-gray-100 hover:bg-blue-50/40 transition cursor-pointer"
-                                onclick="event.stopPropagation(); openDetailForm(${c.id}, '${c.nama.replace(/'/g, "\\'")}', ${b.bulan}, ${c.target}, ${c.realisasi}, ${c.peserta_target}, ${c.peserta_realisasi}, '${c.nama.replace(/'/g, "\\'")}', true)">
+                                data-detail-id="${c.id}"
+                                data-nama="${escapeHtml(c.nama)}"
+                                data-bulan="${b.bulan}"
+                                data-target="${c.target}"
+                                data-realisasi="${c.realisasi}"
+                                data-peserta-target="${c.peserta_target}"
+                                data-peserta-realisasi="${c.peserta_realisasi}"
+                                data-keterangan="${escapeHtml(c.nama)}"
+                                data-is-child="true"
+                                onclick="event.stopPropagation(); openDetailFormFromRow(this)">
                                 <td class="py-2.5 pl-12 pr-3 text-left">
                                     <div class="flex items-center gap-2">
                                         <span class="text-gray-300 font-mono">├─</span>
-                                        <span class="text-xs font-medium text-gray-700">${c.nama}</span>
+                                        <span class="text-xs font-medium text-gray-700">${escapeHtml(c.nama)}</span>
                                     </div>
                                 </td>
                                 <td class="py-2.5 px-2 text-right text-xs text-blue-600 whitespace-nowrap">${rp(c.target)}</td>
@@ -253,7 +273,7 @@
                                 </td>
                                 <td class="py-2.5 pl-2 pr-4 text-right">
                                     <span class="inline-flex items-center gap-1 text-[10px] font-bold ${pesertaPct >= 100 ? 'text-green-700 bg-green-50' : pesertaPct >= 70 ? 'text-blue-700 bg-blue-50' : 'text-amber-700 bg-amber-50'} px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                        ${c.peserta_realisasi}/${c.peserta_target}
+                                        👥 ${c.peserta_realisasi}/${c.peserta_target}
                                     </span>
                                 </td>
                             </tr>
@@ -273,7 +293,7 @@
                     </td>
                     <td class="px-5 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <span class="font-semibold text-gray-800">${b.bulan_nama}</span>
+                            <span class="font-semibold text-gray-800">${escapeHtml(b.bulan_nama)}</span>
                             <i data-lucide="chevron-down" class="chevron-icon w-3.5 h-3.5 text-gray-400 flex-shrink-0 ${isOpen ? 'rotate' : ''}"></i>
                         </div>
                     </td>
@@ -304,7 +324,7 @@
                                     <div class="flex items-center gap-2">
                                         <i data-lucide="layers" class="w-4 h-4 text-emerald-700"></i>
                                         <span class="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                                            Rincian PNBP - ${b.bulan_nama} ${pnbp.tahun}
+                                            Rincian PNBP - ${escapeHtml(b.bulan_nama)} ${escapeHtml(pnbp.tahun)}
                                         </span>
                                     </div>
                                     <span class="text-xs text-gray-500">Total: ${rp(b.total_realisasi)}</span>
@@ -324,7 +344,7 @@
                                         <tbody>${detailRowsHtml}</tbody>
                                         <tfoot class="bg-gradient-to-r from-blue-50 to-emerald-50 border-t-2 border-emerald-200">
                                             <tr>
-                                                <td class="py-3 pl-4 pr-3 font-bold text-emerald-900 text-xs uppercase">Total ${b.bulan_nama}</td>
+                                                <td class="py-3 pl-4 pr-3 font-bold text-emerald-900 text-xs uppercase">Total ${escapeHtml(b.bulan_nama)}</td>
                                                 <td class="py-3 px-2 text-right font-bold text-blue-800 text-xs whitespace-nowrap">${rp(b.total_target)}</td>
                                                 <td class="py-3 px-2 text-right font-bold text-emerald-800 text-xs whitespace-nowrap">${rp(b.total_realisasi)}</td>
                                                 <td class="py-3 px-2 text-right text-xs font-bold text-amber-700">${b.capaian}%</td>
@@ -340,11 +360,10 @@
             `;
         }).join('');
 
-        // Footer total tahunan
         tfoot.innerHTML = `
             <tr class="bg-gradient-to-r from-emerald-50 to-blue-50 border-t-2 border-emerald-100">
                 <td colspan="3" class="px-5 py-4 text-center font-bold text-emerald-900 text-sm">
-                    TOTAL TAHUNAN ${pnbp.tahun}
+                    TOTAL TAHUNAN ${escapeHtml(pnbp.tahun)}
                 </td>
                 <td class="px-5 py-4 text-center font-bold text-emerald-800 text-base whitespace-nowrap">
                     ${rp(pnbp.total_target)}
@@ -381,6 +400,22 @@
         }
     };
 
+    // ============ OPEN DETAIL FORM FROM ROW (aman XSS) ============
+    window.openDetailFormFromRow = function (row) {
+        const ds = row.dataset;
+        window.openDetailForm(
+            Number(ds.detailId),
+            ds.nama || '',
+            Number(ds.bulan),
+            Number(ds.target) || 0,
+            Number(ds.realisasi) || 0,
+            Number(ds.pesertaTarget) || 0,
+            Number(ds.pesertaRealisasi) || 0,
+            ds.keterangan || null,
+            ds.isChild === 'true'
+        );
+    };
+
     // ============ MODAL FORM DETAIL ============
     window.openDetailForm = function (detailId, nama, bulan, target, realisasi, pesertaTarget, pesertaRealisasi, keterangan, isChild) {
         const bulanNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -391,8 +426,8 @@
             html: `
                 <div class="text-left space-y-3 text-sm mt-2">
                     <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
-                        <p class="text-[10px] text-emerald-700 uppercase font-bold tracking-wider">${bulanNames[bulan-1]} ${currentTahun}</p>
-                        <p class="font-semibold text-emerald-900">${nama}</p>
+                        <p class="text-[10px] text-emerald-700 uppercase font-bold tracking-wider">${escapeHtml(bulanNames[bulan-1])} ${escapeHtml(currentTahun)}</p>
+                        <p class="font-semibold text-emerald-900">${escapeHtml(nama)}</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -434,7 +469,7 @@
                     <div>
                         <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Nama / Keterangan</label>
                         <input id="f-keterangan" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                            value="${keterangan || ''}" placeholder="Nama sub-kategori (opsional)" />
+                            value="${escapeHtml(keterangan || '')}" placeholder="Nama sub-kategori (opsional)" />
                     </div>
                 </div>
             `,
@@ -523,7 +558,7 @@
                     <div>
                         <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tahun <span class="text-red-500">*</span></label>
                         <select id="f-tahun" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white">
-                            ${yearOptions.map(y => `<option value="${y}">${y}</option>`).join('')}
+                            ${yearOptions.map(y => `<option value="${y}">${escapeHtml(y)}</option>`).join('')}
                         </select>
                     </div>
                     <div>

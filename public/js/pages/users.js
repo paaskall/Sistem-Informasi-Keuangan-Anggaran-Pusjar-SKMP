@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - User Management (with Admin Password Confirmation)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -40,7 +41,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Password</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">${message}</p>
+                    <p class="text-sm text-gray-500 leading-relaxed">${escapeHtml(message)}</p>
                 </div>
                 <div class="text-left">
                     <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
@@ -89,11 +90,9 @@
             },
             buttonsStyling: false,
             didOpen: () => {
-                // Auto focus input
                 const input = document.getElementById('swal-confirm-password');
                 if (input) {
                     input.focus();
-                    // Enter untuk submit
                     input.addEventListener('keypress', (e) => {
                         if (e.key === 'Enter') {
                             Swal.clickConfirm();
@@ -114,7 +113,6 @@
 
         if (!password) return false;
 
-        // Tampilkan loading
         Swal.fire({
             title: 'Memverifikasi...',
             allowOutsideClick: false,
@@ -173,7 +171,7 @@
             viewer: 'bg-gray-100 text-gray-700',
         };
         const cls = colors[role] || 'bg-gray-100 text-gray-700';
-        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${label}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHtml(label)}</span>`;
     }
 
     function renderTable(users) {
@@ -198,15 +196,15 @@
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-700 to-blue-500 flex items-center justify-center text-white text-sm font-bold">
-                                ${u.initial}
+                                ${escapeHtml(u.initial)}
                             </div>
-                            <span class="font-medium text-gray-800">${u.name}</span>
+                            <span class="font-medium text-gray-800">${escapeHtml(u.name)}</span>
                             ${isSelf ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold ml-1">ANDA</span>' : ''}
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-gray-600 font-mono text-xs">${u.username}</td>
+                    <td class="px-4 py-3 text-gray-600 font-mono text-xs">${escapeHtml(u.username)}</td>
                     <td class="px-4 py-3">${roleBadge(u.role, u.role_label)}</td>
-                    <td class="px-4 py-3 text-gray-600 text-xs">${u.unit || '-'}</td>
+                    <td class="px-4 py-3 text-gray-600 text-xs">${escapeHtml(u.unit || '-')}</td>
                     <td class="px-4 py-3">${statusBadge}</td>
                     <td class="px-4 py-3 text-right">
                         <button type="button" onclick="toggleActive(${u.id})"
@@ -250,12 +248,12 @@
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Nama Lengkap <span class="text-red-500">*</span></label>
                 <input id="f-name" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    value="${user ? user.name : ''}" placeholder="Nama lengkap" />
+                    value="${user ? escapeHtml(user.name) : ''}" placeholder="Nama lengkap" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Username <span class="text-red-500">*</span></label>
                 <input id="f-username" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono"
-                    value="${user ? user.username : ''}" placeholder="username" />
+                    value="${user ? escapeHtml(user.username) : ''}" placeholder="username" />
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
@@ -278,7 +276,7 @@
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Unit <span class="text-red-500">*</span></label>
                 <select id="f-unit" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
                     <option value="">- Pilih Unit -</option>
-                    ${units.map(u => `<option value="${u}" ${currentUnit === u ? 'selected' : ''}>${u}</option>`).join('')}
+                    ${units.map(u => `<option value="${escapeHtml(u)}" ${currentUnit === u ? 'selected' : ''}>${escapeHtml(u)}</option>`).join('')}
                 </select>
             </div>
         </div>`;

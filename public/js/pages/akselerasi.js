@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP — Akselerasi Penyerapan Anggaran (CRUD)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -74,10 +75,10 @@
                         </span>
                     </td>
                     <td class="px-4 py-4">
-                        <p class="font-semibold text-slate text-label">${item.kegiatan}</p>
+                        <p class="font-semibold text-slate text-label">${escapeHtml(item.kegiatan)}</p>
                     </td>
                     <td class="px-4 py-4">
-                        <span class="text-caption text-gray-600">${item.jangka_waktu}</span>
+                        <span class="text-caption text-gray-600">${escapeHtml(item.jangka_waktu)}</span>
                     </td>
                     <td class="px-4 py-4">
                         <div class="flex items-center gap-2">
@@ -88,7 +89,7 @@
                         </div>
                     </td>
                     <td class="px-4 py-4">
-                        <span class="text-caption text-gray-600">${item.keterangan || '-'}</span>
+                        <span class="text-caption text-gray-600">${escapeHtml(item.keterangan || '-')}</span>
                     </td>
                     <td class="px-4 py-4 text-right">
                         <button type="button" onclick="editAkselerasi(${item.id})"
@@ -116,7 +117,7 @@
                     </label>
                     <input id="f-kegiatan" type="text"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        value="${item ? item.kegiatan : ''}"
+                        value="${item ? escapeHtml(item.kegiatan) : ''}"
                         placeholder="Contoh: Percepatan penyelesaian dokumen..." />
                 </div>
                 <div>
@@ -125,7 +126,7 @@
                     </label>
                     <input id="f-jangka" type="text"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        value="${item ? item.jangka_waktu : ''}"
+                        value="${item ? escapeHtml(item.jangka_waktu) : ''}"
                         placeholder="Contoh: Oktober 2026" />
                 </div>
                 <div>
@@ -134,7 +135,7 @@
                     </label>
                     <input id="f-progress" type="number" min="0" max="100"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        value="${item ? item.progress : 0}" />
+                        value="${item ? escapeHtml(item.progress) : 0}" />
                 </div>
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
@@ -142,7 +143,7 @@
                     </label>
                     <textarea id="f-keterangan" rows="3"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        placeholder="Tindak lanjut / catatan...">${item ? (item.keterangan || '') : ''}</textarea>
+                        placeholder="Tindak lanjut / catatan...">${item ? escapeHtml(item.keterangan || '') : ''}</textarea>
                 </div>
             </div>
         `;
@@ -250,7 +251,7 @@
         Swal.fire({
             title: 'Hapus Kegiatan?',
             html: `<div class="text-sm text-gray-600">
-                <p><b>${item.kegiatan}</b> akan dihapus.</p>
+                <p><b>${escapeHtml(item.kegiatan)}</b> akan dihapus.</p>
             </div>`,
             icon: 'warning',
             showCancelButton: true,

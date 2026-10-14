@@ -1,5 +1,6 @@
 // ============================================================
 // SIKAP - Pengadaan List (Blueprint)
+// Versi aman XSS
 // ============================================================
 
 (function () {
@@ -52,7 +53,7 @@
             'Batal': 'bg-red-100 text-red-700',
         };
         const cls = map[s] || 'bg-gray-100 text-gray-700';
-        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-caption font-semibold ${cls}">${s}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-caption font-semibold ${cls}">${escapeHtml(s)}</span>`;
     }
 
     async function loadData() {
@@ -128,21 +129,21 @@
                                 <i data-lucide="${icon}" class="w-5 h-5"></i>
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-slate text-label leading-tight">${p.nama}</p>
-                                <p class="text-caption text-muted mt-0.5">(${p.jenis})</p>
+                                <p class="font-semibold text-slate text-label leading-tight">${escapeHtml(p.nama)}</p>
+                                <p class="text-caption text-muted mt-0.5">(${escapeHtml(p.jenis)})</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-4 py-4 text-right">
                         <p class="font-bold text-brand-primary text-label whitespace-nowrap">${rp(p.nilai)}</p>
-                        <p class="text-caption text-gray-400 font-mono mt-0.5">${p.kode}</p>
+                        <p class="text-caption text-gray-400 font-mono mt-0.5">${escapeHtml(p.kode)}</p>
                     </td>
                     <td class="px-4 py-4">
                         <div class="text-caption text-gray-600 leading-relaxed">
                             ${p.tanggal_mulai ? `
-                                <p>${formatTanggalShort(p.tanggal_mulai)}</p>
+                                <p>${escapeHtml(formatTanggalShort(p.tanggal_mulai))}</p>
                                 <p class="text-[10px] text-gray-400">s.d</p>
-                                <p>${formatTanggalShort(p.tanggal_selesai)}</p>
+                                <p>${escapeHtml(formatTanggalShort(p.tanggal_selesai))}</p>
                             ` : '<span class="text-gray-300">-</span>'}
                         </div>
                     </td>
@@ -158,7 +159,7 @@
                     </td>
                     <td class="px-4 py-4">
                         <span class="inline-block text-caption font-semibold ${p.progress === 100 ? 'text-green-700 bg-green-50' : p.progress > 0 ? 'text-brand-primary bg-blue-50' : 'text-gray-500 bg-gray-50'} px-2.5 py-1 rounded-md">
-                            ${statusLabel}
+                            ${escapeHtml(statusLabel)}
                         </span>
                     </td>
                     <td class="px-4 py-4 text-right" onclick="event.stopPropagation()">
@@ -204,20 +205,20 @@
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Kode <span class="text-red-500">*</span></label>
                 <input id="f-kode" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono"
-                    value="${p ? p.kode : nextKode}" placeholder="PGD-00001" />
+                    value="${escapeHtml(p ? p.kode : nextKode)}" placeholder="PGD-00001" />
                 <p class="text-caption text-muted mt-1">Auto-generate, tapi bisa diubah manual.</p>
             </div>
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Nama Paket <span class="text-red-500">*</span></label>
                 <input id="f-nama" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    value="${p ? p.nama : ''}" placeholder="Nama pengadaan" />
+                    value="${escapeHtml(p ? p.nama : '')}" placeholder="Nama pengadaan" />
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Jenis <span class="text-red-500">*</span></label>
                     <select id="f-jenis" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white">
                         <option value="">- Pilih Jenis -</option>
-                        ${jenisList.map(j => `<option value="${j.id}" ${p && p.jenis_pengadaan_id === j.id ? 'selected' : ''}>${j.nama}</option>`).join('')}
+                        ${jenisList.map(j => `<option value="${escapeHtml(j.id)}" ${p && p.jenis_pengadaan_id === j.id ? 'selected' : ''}>${escapeHtml(j.nama)}</option>`).join('')}
                     </select>
                 </div>
                 <div>
@@ -232,18 +233,18 @@
             <div>
                 <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Penyedia</label>
                 <input id="f-penyedia" type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    value="${p && p.penyedia ? p.penyedia : ''}" placeholder="PT/CV/Perorangan" />
+                    value="${escapeHtml(p && p.penyedia ? p.penyedia : '')}" placeholder="PT/CV/Perorangan" />
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tgl Mulai</label>
                     <input id="f-tgl-mulai" type="date" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        value="${p && p.tanggal_mulai ? p.tanggal_mulai : ''}" />
+                        value="${escapeHtml(p && p.tanggal_mulai ? p.tanggal_mulai : '')}" />
                 </div>
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">Tgl Selesai</label>
                     <input id="f-tgl-selesai" type="date" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        value="${p && p.tanggal_selesai ? p.tanggal_selesai : ''}" />
+                        value="${escapeHtml(p && p.tanggal_selesai ? p.tanggal_selesai : '')}" />
                 </div>
             </div>
             ${!p ? `
@@ -252,7 +253,7 @@
                         <input type="checkbox" id="f-use-template" checked class="mt-0.5 w-4 h-4 rounded border-gray-300 text-brand-primary" />
                         <div>
                             <p class="text-label font-semibold text-brand-primary">Gunakan template tahapan standar</p>
-                            <p class="text-caption text-brand-primary mt-0.5">${templateTahapan.join(' → ')}</p>
+                            <p class="text-caption text-brand-primary mt-0.5">${escapeHtml(templateTahapan.join(' → '))}</p>
                         </div>
                     </label>
                 </div>
@@ -338,7 +339,7 @@
         Swal.fire({
             title: 'Hapus Pengadaan?',
             html: `<div class="text-sm text-gray-600 text-left">
-                <p>Paket <b>${p.nama}</b> (${p.kode}) akan dihapus.</p>
+                <p>Paket <b>${escapeHtml(p.nama)}</b> (${escapeHtml(p.kode)}) akan dihapus.</p>
                 <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-xs mt-3 text-red-700">
                     <b>⚠ Peringatan:</b> Semua tahapan pengadaan (${p.jumlah_tahapan} item) juga akan dihapus.
                 </div>

@@ -8,6 +8,7 @@ use App\Models\Realisasi;
 use App\Models\Target;
 use App\Models\User;
 use App\Observers\AuditableObserver;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +25,13 @@ class AppServiceProvider extends ServiceProvider
         Realisasi::observe(AuditableObserver::class);
         Pengadaan::observe(AuditableObserver::class);
         Kendala::observe(AuditableObserver::class);
-        User::observe(AuditableObserver::class); 
+        User::observe(AuditableObserver::class);
+
+        // ============================================================
+        // FORCE HTTPS DI PRODUCTION
+        // ============================================================
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
