@@ -34,6 +34,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // ============================================================
         $middleware->redirectGuestsTo('/login');
 
+        // ============================================================
+        // TRUST PROXY (Cloudflare Tunnel)
+        // Tanpa ini Laravel mengira request = http:// sehingga route()
+        // menghasilkan URL http:// dan cookie sesi tidak ikut terkirim.
+        // Untuk production sungguhan, ganti '*' dengan IP proxy Anda.
+        // ============================================================
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectUsersTo(function () {
             $user = auth()->user();
             return match ($user?->role) {
@@ -59,6 +67,15 @@ return Application::configure(basePath: dirname(__DIR__))
                         'message' => 'Validasi gagal.',
                         'errors' => $e->errors(),
                     ], 422);
+                }
+
+                // Belum login / sesi berakhir — 401 (bukan 500)
+                if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                    return response()->json([
+                        'ok' => false,
+                        'message' => 'Sesi Anda berakhir. Silakan login kembali.',
+                        'status' => 401,
+                    ], 401);
                 }
 
                 $status = 500;

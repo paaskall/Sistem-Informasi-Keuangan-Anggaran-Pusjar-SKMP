@@ -11,6 +11,7 @@
     async function apiCall(method, url, body) {
         const opts = {
             method,
+            credentials: 'same-origin',
             headers: {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': DATA.csrf,
@@ -22,6 +23,10 @@
             opts.body = JSON.stringify(body);
         }
         const res = await fetch(url, opts);
+        if (res.status === 401) {
+            window.location.href = '/login';
+            return { ok: false, status: 401, data: {} };
+        }
         const json = await res.json().catch(() => ({}));
         return { ok: res.ok, status: res.status, data: json };
     }
