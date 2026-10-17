@@ -5,7 +5,7 @@
 @section('content')
 {{-- BACK LINK --}}
 <div class="mb-6">
-    <a href="{{ route('viewer.pengadaan') }}"
+    <a href="{{ route('user.pengadaan') }}"
         class="inline-flex items-center gap-1.5 text-label text-muted hover:text-brand-primary transition-blueprint">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         Kembali ke Daftar Pengadaan
@@ -40,7 +40,7 @@
 window.PENGADAAN_DETAIL_DATA = {
     pengadaanId: @json($pengadaanId),
     routes: {
-        data: @json(route('viewer.pengadaan.detail-data', ['id' => '__ID__'])),
+        data: @json(route('user.pengadaan.detail-data', ['id' => '__ID__'])),
     },
     csrf: @json(csrf_token()),
 };
@@ -52,5 +52,5 @@ window.PENGADAAN_DETAIL_DATA = {
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/pages/pengadaan-detail-viewer.js') }}?v={{ filemtime(public_path('js/pages/pengadaan-detail-viewer.js')) }}"></script>
+<script src="{{ asset('js/pages/pengadaan-detail-user.js') }}?v={{ filemtime(public_path('js/pages/pengadaan-detail-user.js')) }}"></script>
 @endpush

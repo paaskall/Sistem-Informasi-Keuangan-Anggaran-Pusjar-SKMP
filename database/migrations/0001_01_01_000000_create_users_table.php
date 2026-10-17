@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('username', 50)->unique();
             $table->string('password');
             $table->string('name', 100);
-            $table->enum('role', ['admin', 'keuangan', 'pimpinan'])->default('keuangan');
+            $table->enum('role', ['admin_keuangan', 'keuangan', 'pimpinan', 'user'])->default('user');
             $table->string('unit', 100)->nullable();
             $table->boolean('active')->default(true);
             $table->rememberToken();

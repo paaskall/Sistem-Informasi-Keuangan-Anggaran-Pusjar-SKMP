@@ -5,7 +5,7 @@
     $role = $user?->role ?? 'guest';
 
     $menus = [
-        'admin' => [
+        'admin_keuangan' => [
             ['section' => 'Dashboard', 'icon' => null, 'items' => [
                 ['route' => 'admin.dashboard', 'url' => route('admin.dashboard'), 'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
             ]],
@@ -35,11 +35,12 @@
             ['section' => 'Pelaksanaan', 'icon' => 'briefcase', 'items' => [
                 ['url' => route('keuangan.pengadaan'), 'icon' => 'shopping-cart', 'label' => 'Pengadaan'],
                 ['url' => route('keuangan.kendala'), 'icon' => 'alert-triangle', 'label' => 'Kendala'],
+                ['url' => route('keuangan.tasks.index'), 'icon' => 'calendar-check', 'label' => 'Task Bulanan'],
             ]],
             ['section' => 'Pelaporan', 'icon' => 'file-spreadsheet', 'items' => [
                 ['url' => route('keuangan.pnbp'), 'icon' => 'receipt', 'label' => 'PNBP'],
                 ['url' => route('keuangan.laporan'), 'icon' => 'file-text', 'label' => 'Laporan'],
-                ['url' => route('keuangan.akselerasi'), 'icon' => 'zap', 'label' => 'Akselerasi'], 
+                ['url' => route('keuangan.akselerasi'), 'icon' => 'zap', 'label' => 'Akselerasi'],
             ]],
         ],
         'pimpinan' => [
@@ -50,18 +51,19 @@
                 ['url' => route('pimpinan.laporan'), 'icon' => 'file-text', 'label' => 'Target & Realisasi'],
                 ['url' => route('pimpinan.pengadaan'), 'icon' => 'shopping-cart', 'label' => 'Pengadaan'],
                 ['url' => route('pimpinan.pnbp'), 'icon' => 'receipt', 'label' => 'PNBP'],
+                ['url' => route('pimpinan.tasks.index'), 'icon' => 'calendar-check', 'label' => 'Task Bulanan'],
                 ['url' => route('pimpinan.audit'), 'icon' => 'scroll-text', 'label' => 'Audit Trail'],
             ]],
         ],
-        'viewer' => [
+        'user' => [
             ['section' => 'Menu Utama', 'icon' => null, 'items' => [
-                ['url' => route('viewer.dashboard'), 'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
+                ['url' => route('user.dashboard'), 'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
             ]],
             ['section' => 'Data', 'icon' => 'database', 'items' => [
-                ['url' => route('viewer.target'), 'icon' => 'target', 'label' => 'Target'],
-                ['url' => route('viewer.realisasi'), 'icon' => 'trending-up', 'label' => 'Realisasi'],
-                ['url' => route('viewer.pengadaan'), 'icon' => 'shopping-cart', 'label' => 'Pengadaan'],
-                ['url' => route('viewer.pnbp'), 'icon' => 'receipt', 'label' => 'PNBP'],
+                ['url' => route('user.target'), 'icon' => 'target', 'label' => 'Target'],
+                ['url' => route('user.realisasi'), 'icon' => 'trending-up', 'label' => 'Realisasi'],
+                ['url' => route('user.pengadaan'), 'icon' => 'shopping-cart', 'label' => 'Pengadaan'],
+                ['url' => route('user.pnbp'), 'icon' => 'receipt', 'label' => 'PNBP'],
             ]],
         ],
     ];
@@ -114,7 +116,7 @@
 {{-- User Card --}}
 @if ($user)
     <div class="border-t border-gray-100 flex-shrink-0">
-        <a href="{{ route('profile') }}" 
+        <a href="{{ route('profile') }}"
            class="flex items-center gap-3 p-4 hover:bg-info-bg transition-blueprint group">
             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white text-label font-bold flex-shrink-0 overflow-hidden">
                 @if ($user->avatar)

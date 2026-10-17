@@ -45,11 +45,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function () {
             $user = auth()->user();
             return match ($user?->role) {
-                'admin' => '/admin',
-                'keuangan' => '/keuangan',
-                'pimpinan' => '/pimpinan',
-                'viewer' => '/viewer',
-                default => '/',
+                'admin_keuangan' => '/admin',
+                'keuangan'       => '/keuangan',
+                'pimpinan'       => '/pimpinan',
+                'user'           => '/user',
+                default          => '/',
             };
         });
     })

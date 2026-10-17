@@ -8,7 +8,7 @@
         title="Realisasi Penerimaan PNBP"
         subtitle="Penerimaan Negara Bukan Pajak"
         :breadcrumb="[
-            ['label' => 'Dashboard', 'url' => route('viewer.dashboard')],
+            ['label' => 'Dashboard', 'url' => route('user.dashboard')],
             ['label' => 'PNBP'],
         ]"
     />
@@ -65,9 +65,9 @@
 <script>
 window.PNBP_DATA = {
     initialTahun: @json($tahun),
-    isViewer: true,
+    isuser: true,
     routes: {
-        data: @json(route('viewer.pnbp.data')),
+        data: @json(route('user.pnbp.data')),
     },
     csrf: @json(csrf_token()),
 };
@@ -79,5 +79,5 @@ window.PNBP_DATA = {
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/pages/pnbp-viewer.js') }}?v={{ filemtime(public_path('js/pages/pnbp-viewer.js')) }}"></script>
+<script src="{{ asset('js/pages/pnbp-user.js') }}?v={{ filemtime(public_path('js/pages/pnbp-user.js')) }}"></script>
 @endpush

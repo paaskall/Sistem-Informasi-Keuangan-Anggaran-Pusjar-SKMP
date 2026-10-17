@@ -20,10 +20,11 @@
                     <span id="avatar-initial">?</span>
                 </div>
                 <button type="button" onclick="triggerAvatarUpload()"
-                    class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center shadow-lg transition">
+                    class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center shadow-lg transition"
+                    title="Ganti Avatar">
                     <i data-lucide="camera" class="w-4 h-4"></i>
                 </button>
-                <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="uploadAvatar(this)" />
+                <input type="file" id="avatar-input" class="hidden" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" onchange="uploadAvatar(this)" />
             </div>
 
             <h3 id="profile-name" class="text-xl font-bold text-gray-800 mb-1">-</h3>
@@ -38,6 +39,10 @@
                 <p><b>Unit:</b> <span id="profile-unit">-</span></p>
                 <p><b>Bergabung:</b> <span id="profile-joined">-</span></p>
             </div>
+
+            <p class="text-[10px] text-gray-400 mt-3 pt-3 border-t border-gray-100">
+                Format: JPG, PNG, GIF, WEBP · Maks 2 MB
+            </p>
         </div>
 
         {{-- INFO AKTIVITAS --}}
@@ -100,18 +105,104 @@
             <form id="form-password" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1.5">Password Saat Ini <span class="text-red-500">*</span></label>
-                    <input id="f-current-password" type="password" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required />
+                    <div class="relative">
+                        <input id="f-current-password" type="password" class="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required autocomplete="current-password" />
+                        <button type="button" onclick="toggleProfilePassword('f-current-password', 'eye-current-password')"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="eye-current-password" data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1.5">Password Baru <span class="text-red-500">*</span></label>
-                        <input id="f-new-password" type="password" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required />
-                        <p class="text-[10px] text-gray-500 mt-1">Minimal 5 karakter</p>
+                        <div class="relative">
+                            <input id="f-new-password" type="password" class="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required autocomplete="new-password" />
+                            <button type="button" onclick="toggleProfilePassword('f-new-password', 'eye-new-password')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                <i id="eye-new-password" data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1.5">Konfirmasi Password <span class="text-red-500">*</span></label>
-                        <input id="f-new-password-confirm" type="password" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required />
+                        <div class="relative">
+                            <input id="f-new-password-confirm" type="password" class="w-full px-3 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500" required autocomplete="new-password" />
+                            <button type="button" onclick="toggleProfilePassword('f-new-password-confirm', 'eye-new-password-confirm')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                <i id="eye-new-password-confirm" data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <p id="confirm-hint" class="hidden"></p>
                     </div>
+                </div>
+
+                {{-- LIVE CHECKLIST SYARAT PASSWORD --}}
+                <div class="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[10px] font-bold text-blue-800 uppercase tracking-wider flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Syarat Password
+                        </p>
+                        <span id="pw-strength-label" class="text-[10px] font-bold text-gray-500">Belum diisi</span>
+                    </div>
+
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3 overflow-hidden">
+                        <div id="pw-strength-bar" class="h-full rounded-full transition-all duration-300 bg-gray-300" style="width: 0%"></div>
+                    </div>
+
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                        <li id="rule-length" class="flex items-start gap-2 text-[11px] text-gray-400 transition-colors">
+                            <span data-rule-icon class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </span>
+                            <span>Minimal <b>12 karakter</b></span>
+                        </li>
+                        <li id="rule-uppercase" class="flex items-start gap-2 text-[11px] text-gray-400 transition-colors">
+                            <span data-rule-icon class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </span>
+                            <span>Huruf besar (<b>A-Z</b>)</span>
+                        </li>
+                        <li id="rule-lowercase" class="flex items-start gap-2 text-[11px] text-gray-400 transition-colors">
+                            <span data-rule-icon class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </span>
+                            <span>Huruf kecil (<b>a-z</b>)</span>
+                        </li>
+                        <li id="rule-number" class="flex items-start gap-2 text-[11px] text-gray-400 transition-colors">
+                            <span data-rule-icon class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </span>
+                            <span>Angka (<b>0-9</b>)</span>
+                        </li>
+                        <li id="rule-symbol" class="flex items-start gap-2 text-[11px] text-gray-400 transition-colors">
+                            <span data-rule-icon class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </span>
+                            <span>Simbol (<b>!@#$%^&*</b>)</span>
+                        </li>
+                    </ul>
+
+                    <p class="text-[9px] text-blue-600 mt-2 pt-2 border-t border-blue-100 flex items-start gap-1">
+                        <svg class="w-2.5 h-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Password juga dicek terhadap database kebocoran (haveibeenpwned.com)
+                    </p>
                 </div>
 
                 <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2 text-xs text-amber-800">
@@ -144,5 +235,5 @@ window.PROFILE_DATA = {
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/pages/profile.js') }}"></script>
+<script src="{{ asset('js/pages/profile.js') }}?v={{ filemtime(public_path('js/pages/profile.js')) }}"></script>
 @endpush

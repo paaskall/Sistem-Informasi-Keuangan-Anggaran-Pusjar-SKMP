@@ -1,5 +1,5 @@
 // ============================================================
-// SIKAP - Dashboard (Keuangan & Pimpinan & Viewer)
+// SIKAP - Dashboard (Keuangan & Pimpinan & User)
 // Versi aman XSS
 // ============================================================
 
@@ -84,6 +84,7 @@
         renderKendalaPengadaan(d.kendala_pengadaan);
         renderRencanaPengadaan(d.rencana_pengadaan);
         renderBulanIni(d.bulan_ini);
+        renderUpcomingTasks(d.upcoming_tasks);   // ⬅️ TAMBAH
         if (d.ringkasan_modul) renderRingkasanModul(d.ringkasan_modul);
         updateArsipBanner();
 
@@ -294,7 +295,16 @@
         const container = document.getElementById('pnbp-summary-card');
         if (!container) return;
 
+        const roleBase = DATA.role === 'keuangan' ? 'keuangan' : DATA.role;
+
         if (!data || !data.exists) {
+            const actionBtn = DATA.role === 'keuangan'
+                ? `<a href="/${roleBase}/pnbp?tahun=${currentTahun}"
+                        class="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition">
+                        <i data-lucide="plus" class="w-3 h-3"></i> Buat Data PNBP
+                    </a>`
+                : '';
+
             container.innerHTML = `
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-full">
                     <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-4 flex items-center gap-3">
@@ -311,10 +321,7 @@
                             <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
                         </div>
                         <p class="text-sm text-gray-500 mb-3">Belum ada data PNBP untuk tahun ${escapeHtml(currentTahun)}</p>
-                        <a href="/keuangan/pnbp?tahun=${currentTahun}"
-                        class="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg transition">
-                            <i data-lucide="plus" class="w-3 h-3"></i> Buat Data PNBP
-                        </a>
+                        ${actionBtn}
                     </div>
                 </div>`;
             if (window.lucide) lucide.createIcons();
@@ -774,6 +781,13 @@
             return;
         }
 
+        const kelolaLink = DATA.role === 'keuangan'
+            ? `<a href="/keuangan/akselerasi"
+                    class="text-[11px] text-blue-700 hover:underline font-semibold flex items-center gap-1">
+                    Kelola <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </a>`
+            : '';
+
         const itemsHtml = data.items.map((item, idx) => {
             const pct = Math.min(Math.max(item.progress, 0), 100);
             const barColor = pct >= 80 ? 'from-green-600 to-green-400'
@@ -834,10 +848,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5">Kegiatan percepatan pencapaian target anggaran</p>
                         </div>
                     </div>
-                    <a href="/keuangan/akselerasi"
-                        class="text-[11px] text-blue-700 hover:underline font-semibold flex items-center gap-1">
-                        Kelola <i data-lucide="arrow-right" class="w-3 h-3"></i>
-                    </a>
+                    ${kelolaLink}
                 </div>
 
                 <div class="p-4 space-y-2">
@@ -850,7 +861,7 @@
     }
 
     // ============================================================
-    // KENDALA DALAM PENGADAAN (3 KOLOM)
+    // KENDALA DALAM PENGADAAN
     // ============================================================
     function renderKendalaPengadaan(data) {
         const container = document.getElementById('kendala-pengadaan-container');
@@ -953,6 +964,8 @@
             return;
         }
 
+        const roleBase = DATA.role === 'keuangan' ? 'keuangan' : DATA.role;
+
         const itemsHtml = data.items.map((item, idx) => {
             const progressColor = item.progress >= 100 ? 'text-green-700 bg-green-100'
                                 : item.progress >= 70 ? 'text-blue-700 bg-blue-100'
@@ -989,7 +1002,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5">Rencana & progress paket pengadaan</p>
                         </div>
                     </div>
-                    <a href="/keuangan/pengadaan"
+                    <a href="/${roleBase}/pengadaan"
                         class="text-[11px] text-blue-700 hover:underline font-semibold flex items-center gap-1">
                         Lihat Semua <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </a>
@@ -1051,6 +1064,102 @@
                 </div>
             </div>`;
         if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // WIDGET: UPCOMING TASKS
+    // ============================================================
+    function renderUpcomingTasks(tasks) {
+        const container = document.getElementById('upcoming-tasks-body');
+        if (!container) return;
+
+        if (!tasks || tasks.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-14 h-14 mx-auto mb-2 rounded-full bg-green-50 flex items-center justify-center">
+                        <i data-lucide="check-circle-2" class="w-7 h-7 text-green-500"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-700">Semua task selesai!</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Tidak ada task mendatang</p>
+                </div>`;
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        const statusConfig = {
+            belum: { icon: 'circle-dashed', bg: 'bg-blue-100', text: 'text-blue-700' },
+            proses: { icon: 'loader', bg: 'bg-amber-100', text: 'text-amber-700' },
+            selesai: { icon: 'check-circle-2', bg: 'bg-green-100', text: 'text-green-700' },
+            dibatalkan: { icon: 'x-circle', bg: 'bg-red-100', text: 'text-red-700' },
+        };
+
+        const itemsHtml = tasks.map(t => {
+            const cfg = statusConfig[t.status] || statusConfig.belum;
+
+            // Label waktu (dengan icon)
+            let timeIcon = 'calendar';
+            let timeLabel = '';
+            let timeColor = 'text-gray-500';
+            if (t.is_overdue) {
+                const days = Math.abs(t.hari_tersisa || 0);
+                timeIcon = 'alert-triangle';
+                timeLabel = `Terlambat ${days} hari`;
+                timeColor = 'text-red-600 font-bold';
+            } else if (t.hari_tersisa === 0) {
+                timeIcon = 'flame';
+                timeLabel = 'Hari ini';
+                timeColor = 'text-red-600 font-bold';
+            } else if (t.hari_tersisa === 1) {
+                timeIcon = 'alarm-clock';
+                timeLabel = 'Besok';
+                timeColor = 'text-amber-600 font-bold';
+            } else if (t.hari_tersisa !== null) {
+                timeIcon = 'calendar';
+                timeLabel = `${t.hari_tersisa} hari lagi`;
+                timeColor = 'text-gray-500';
+            } else {
+                timeIcon = 'calendar-off';
+                timeLabel = 'Belum dijadwalkan';
+                timeColor = 'text-gray-400';
+            }
+
+            const url = getTaskDetailUrl(t.id);
+
+            return `
+                <a href="${url}"
+                   class="flex items-start gap-3 p-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 hover:border-gray-200 transition cursor-pointer block">
+                    <div class="w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i data-lucide="${cfg.icon}" class="w-4 h-4 ${cfg.text}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug">
+                            ${escapeHtml(t.judul)}
+                        </p>
+                        <div class="flex items-center gap-2 mt-1 text-[10px] flex-wrap">
+                            <span class="${timeColor} flex items-center gap-0.5">
+                                <i data-lucide="${timeIcon}" class="w-2.5 h-2.5"></i>
+                                ${timeLabel}
+                            </span>
+                            ${t.assigned_name ? `
+                                <span class="text-gray-500 flex items-center gap-0.5">
+                                    <i data-lucide="user" class="w-2.5 h-2.5"></i>
+                                    ${escapeHtml(t.assigned_name)}
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                </a>`;
+        }).join('');
+
+        container.innerHTML = itemsHtml;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function getTaskDetailUrl(taskId) {
+        const role = DATA.role;
+        if (role === 'keuangan') return `/keuangan/tasks?open=${taskId}`;
+        if (role === 'pimpinan') return `/pimpinan/tasks?open=${taskId}`;
+        return '#';
     }
 
     // ============================================================

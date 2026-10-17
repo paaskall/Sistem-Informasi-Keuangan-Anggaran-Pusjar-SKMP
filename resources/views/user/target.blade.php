@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'SIKAP - Realisasi (Viewer)')
+@section('title', 'SIKAP - Target (user)')
 
 @section('content')
 <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
     <x-ui.page-title
-        title="Realisasi Keuangan"
-        subtitle="Lihat realisasi per target bulanan"
+        title="Kelola Target"
+        subtitle="Lihat target bulanan"
         :breadcrumb="[
-            ['label' => 'Dashboard', 'url' => route('viewer.dashboard')],
-            ['label' => 'Realisasi'],
+            ['label' => 'Dashboard', 'url' => route('user.dashboard')],
+            ['label' => 'Target'],
         ]"
     />
     <x-ui.badge variant="warning" icon="lock">Read Only</x-ui.badge>
@@ -36,7 +36,7 @@
     </div>
 </x-ui.card>
 
-{{-- TABEL REALISASI --}}
+{{-- TABEL TARGET --}}
 <x-ui.card padding="p-0">
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -44,36 +44,35 @@
                 <tr>
                     <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-16">#</th>
                     <th class="text-center px-5 py-4 text-caption font-semibold uppercase">Bulan</th>
-                    <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-32">Tanggal</th>
-                    <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-40">Detail</th>
-                    <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-56">Realisasi</th>
+                    <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-44">Komponen</th>
+                    <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-56">Target</th>
                     <th class="text-center px-5 py-4 text-caption font-semibold uppercase w-24">Detail</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 text-label" id="realisasi-tbody">
-                <tr><td colspan="6" class="text-center py-10 text-muted">Memuat...</td></tr>
+            <tbody class="divide-y divide-gray-100 text-label" id="target-tbody">
+                <tr><td colspan="5" class="text-center py-10 text-muted">Memuat...</td></tr>
             </tbody>
+            <tfoot id="target-tfoot"></tfoot>
         </table>
     </div>
 </x-ui.card>
+@endsection
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/pages/target.css') }}?v={{ filemtime(public_path('css/pages/target.css')) }}">
+@endpush
+
+@push('scripts')
 <script>
-window.REALISASI_DATA = {
+window.TARGET_DATA = {
     initialTahun: @json($tahun),
     tahunBerjalan: @json($tahunBerjalan),
-    isViewer: true,
+    isuser: true,
     routes: {
-        data: @json(route('viewer.realisasi.data')),
+        data: @json(route('user.target.data')),
     },
     csrf: @json(csrf_token()),
 };
 </script>
-@endsection
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/pages/realisasi.css') }}?v={{ filemtime(public_path('css/pages/realisasi.css')) }}">
-@endpush
-
-@push('scripts')
-<script src="{{ asset('js/pages/realisasi-viewer.js') }}?v={{ filemtime(public_path('js/pages/realisasi-viewer.js')) }}"></script>
+<script src="{{ asset('js/pages/target-user.js') }}?v={{ filemtime(public_path('js/pages/target-user.js')) }}"></script>
 @endpush

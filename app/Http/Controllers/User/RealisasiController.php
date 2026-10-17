@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Viewer;
+namespace App\Http\Controllers\User;
 
 use App\Helpers\TahunHelper;
 use App\Http\Controllers\Controller;
@@ -25,7 +25,7 @@ class RealisasiController extends Controller
             $tahun = (int) date('Y');
         }
 
-        return view('viewer.realisasi', [
+        return view('user.realisasi', [
             'tahun' => $tahun,
             'tahunOptions' => [2026, 2025, 2024],
             'tahunBerjalan' => TahunHelper::tahunBerjalan(),

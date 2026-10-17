@@ -585,4 +585,35 @@ class DashboardService
             'items' => $items,
         ];
     }
+
+    // ============================================================
+    // WIDGET: UPCOMING TASKS
+    // ============================================================
+
+    /**
+     * Ambil task mendatang untuk widget dashboard.
+     * Return: array task terdekat (belum selesai).
+     */
+    public function getUpcomingTasks(int $limit = 5): array
+    {
+        $tasks = \App\Models\Task::upcoming($limit)
+            ->with(['assignedUser:id,name'])
+            ->get();
+
+        return $tasks->map(function ($t) {
+            return [
+                'id' => $t->id,
+                'judul' => $t->judul,
+                'status' => $t->status,
+                'status_label' => $t->status_label,
+                'status_color' => $t->status_color,
+                'tanggal_mulai' => $t->tanggal_mulai?->format('Y-m-d'),
+                'tanggal_mulai_formatted' => $t->tanggal_mulai?->translatedFormat('d M Y'),
+                'tanggal_selesai_formatted' => $t->tanggal_selesai?->translatedFormat('d M Y'),
+                'assigned_name' => $t->assignedUser?->name,
+                'is_overdue' => $t->is_overdue,
+                'hari_tersisa' => $t->hari_tersisa,
+            ];
+        })->toArray();
+    }
 }

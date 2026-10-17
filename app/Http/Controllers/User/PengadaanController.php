@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Viewer;
+namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisPengadaan;
@@ -18,13 +18,13 @@ class PengadaanController extends Controller
 
     public function index(): View
     {
-        return view('viewer.pengadaan');
+        return view('user.pengadaan');
     }
 
     public function detail(int $id): View
     {
         $pengadaan = Pengadaan::findOrFail($id);
-        return view('viewer.pengadaan-detail', ['pengadaanId' => $pengadaan->id]);
+        return view('user.pengadaan-detail', ['pengadaanId' => $pengadaan->id]);
     }
 
     public function data(Request $request): JsonResponse

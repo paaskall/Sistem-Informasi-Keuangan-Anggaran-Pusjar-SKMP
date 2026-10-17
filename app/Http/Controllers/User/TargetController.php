@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Viewer;
+namespace App\Http\Controllers\User;
 
+use App\Helpers\TahunHelper;
 use App\Http\Controllers\Controller;
-use App\Services\PnbpService;
+use App\Services\TargetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class PnbpController extends Controller
+class TargetController extends Controller
 {
     public function __construct(
-        protected PnbpService $service
+        protected TargetService $service
     ) {}
 
     public function index(Request $request): View
@@ -21,9 +22,10 @@ class PnbpController extends Controller
             $tahun = (int) date('Y');
         }
 
-        return view('viewer.pnbp', [
+        return view('user.target', [
             'tahun' => $tahun,
-            'availableYears' => $this->service->getAvailableYears(),
+            'tahunOptions' => [2026, 2025, 2024],
+            'tahunBerjalan' => TahunHelper::tahunBerjalan(),
         ]);
     }
 
@@ -34,8 +36,10 @@ class PnbpController extends Controller
         return response()->json([
             'ok' => true,
             'tahun' => $tahun,
-            'exists' => $this->service->getByYear($tahun) !== null,
-            'pnbp' => $this->service->getByYear($tahun),
+            'targets' => $this->service->getTargetsByYear($tahun),
+            'total_tahunan' => $this->service->getTotalTahunan($tahun),
+            'references' => $this->service->getReferenceData(),
+            'editable' => false,
         ]);
     }
 }

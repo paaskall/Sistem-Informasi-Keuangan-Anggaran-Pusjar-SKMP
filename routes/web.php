@@ -16,17 +16,19 @@ use App\Http\Controllers\Pimpinan\DashboardController as PimpinanDashboardContro
 use App\Http\Controllers\Pimpinan\LaporanController as PimpinanLaporanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Viewer\DashboardController as ViewerDashboardController;
-use App\Http\Controllers\Viewer\TargetController as ViewerTargetController;
-use App\Http\Controllers\Viewer\RealisasiController as ViewerRealisasiController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\TargetController as UserTargetController;
+use App\Http\Controllers\User\RealisasiController as UserRealisasiController;
 use App\Http\Controllers\Keuangan\PengadaanController;
 use App\Http\Controllers\Pimpinan\PengadaanController as PimpinanPengadaanController;
-use App\Http\Controllers\Viewer\PengadaanController as ViewerPengadaanController;
+use App\Http\Controllers\User\PengadaanController as UserPengadaanController;
 use App\Http\Controllers\Keuangan\PnbpController;
 use App\Http\Controllers\Pimpinan\PnbpController as PimpinanPnbpController;
-use App\Http\Controllers\Viewer\PnbpController as ViewerPnbpController;
+use App\Http\Controllers\User\PnbpController as UserPnbpController;
 use App\Http\Controllers\Keuangan\AkselerasiController;
 use App\Http\Controllers\SsoController;
+use App\Http\Controllers\Keuangan\TaskController as KeuanganTaskController;
+use App\Http\Controllers\Pimpinan\TaskController as PimpinanTaskController;
 
 // ============================================================
 // SSO CALLBACK (HARUS di paling atas, DI LUAR middleware apapun)
@@ -50,9 +52,9 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 // ============================================================
-// CONFIRM PASSWORD (admin only) — untuk aksi sensitif
+// CONFIRM PASSWORD (admin_keuangan only) — untuk aksi sensitif
 // ============================================================
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin_keuangan'])->group(function () {
     Route::post('/confirm-password', [ConfirmPasswordController::class, 'confirm'])
         ->name('password.confirm.submit');
     Route::get('/confirm-password/status', [ConfirmPasswordController::class, 'status'])
@@ -71,11 +73,11 @@ Route::middleware('auth')->group(function () {
 });
 
 // ============================================================
-// ADMIN
+// ADMIN KEUANGAN
 // ============================================================
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth', 'role:admin'])
+    ->middleware(['auth', 'role:admin_keuangan'])
     ->group(function () {
         // Dashboard
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -171,6 +173,19 @@ Route::prefix('keuangan')
         Route::post('/akselerasi', [AkselerasiController::class, 'store'])->name('akselerasi.store');
         Route::put('/akselerasi/{id}', [AkselerasiController::class, 'update'])->name('akselerasi.update');
         Route::delete('/akselerasi/{id}', [AkselerasiController::class, 'destroy'])->name('akselerasi.destroy');
+
+        // Task Bulanan (Reminder Kalender)
+        Route::prefix('tasks')->name('tasks.')->group(function () {
+            Route::get('/', [KeuanganTaskController::class, 'index'])->name('index');
+            Route::get('/data', [KeuanganTaskController::class, 'data'])->name('data');
+            Route::get('/calendar', [KeuanganTaskController::class, 'calendar'])->name('calendar');
+            Route::get('/upcoming', [KeuanganTaskController::class, 'upcoming'])->name('upcoming');
+            Route::get('/assignable-users', [KeuanganTaskController::class, 'assignableUsers'])->name('assignable-users');
+            Route::post('/', [KeuanganTaskController::class, 'store'])->name('store');
+            Route::put('/{id}', [KeuanganTaskController::class, 'update'])->name('update');
+            Route::patch('/{id}/status', [KeuanganTaskController::class, 'updateStatus'])->name('update-status');
+            Route::delete('/{id}', [KeuanganTaskController::class, 'destroy'])->name('destroy');
+        });
     });
 
 // ============================================================
@@ -204,31 +219,39 @@ Route::prefix('pimpinan')
         // PNBP (read-only)
         Route::get('/pnbp', [PimpinanPnbpController::class, 'index'])->name('pnbp');
         Route::get('/pnbp/data', [PimpinanPnbpController::class, 'data'])->name('pnbp.data');
+
+        // Task Bulanan (read-only)
+        Route::prefix('tasks')->name('tasks.')->group(function () {
+            Route::get('/', [PimpinanTaskController::class, 'index'])->name('index');
+            Route::get('/data', [PimpinanTaskController::class, 'data'])->name('data');
+            Route::get('/calendar', [PimpinanTaskController::class, 'calendar'])->name('calendar');
+            Route::get('/upcoming', [PimpinanTaskController::class, 'upcoming'])->name('upcoming');
+        });
     });
 
 // ============================================================
-// VIEWER (read-only)
+// USER (read-only) — sebelumnya VIEWER
 // ============================================================
-Route::prefix('viewer')
-    ->name('viewer.')
-    ->middleware(['auth', 'role:viewer'])
+Route::prefix('user')
+    ->name('user.')
+    ->middleware(['auth', 'role:user'])
     ->group(function () {
-        Route::get('/', [ViewerDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/data', [ViewerDashboardController::class, 'data'])->name('dashboard.data');
+        Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/data', [UserDashboardController::class, 'data'])->name('dashboard.data');
 
-        Route::get('/target', [ViewerTargetController::class, 'index'])->name('target');
-        Route::get('/target/data', [ViewerTargetController::class, 'data'])->name('target.data');
+        Route::get('/target', [UserTargetController::class, 'index'])->name('target');
+        Route::get('/target/data', [UserTargetController::class, 'data'])->name('target.data');
 
-        Route::get('/realisasi', [ViewerRealisasiController::class, 'index'])->name('realisasi');
-        Route::get('/realisasi/data', [ViewerRealisasiController::class, 'data'])->name('realisasi.data');
+        Route::get('/realisasi', [UserRealisasiController::class, 'index'])->name('realisasi');
+        Route::get('/realisasi/data', [UserRealisasiController::class, 'data'])->name('realisasi.data');
 
         // Pengadaan
-        Route::get('/pengadaan', [ViewerPengadaanController::class, 'index'])->name('pengadaan');
-        Route::get('/pengadaan/data', [ViewerPengadaanController::class, 'data'])->name('pengadaan.data');
-        Route::get('/pengadaan/{id}', [ViewerPengadaanController::class, 'detail'])->name('pengadaan.detail');
-        Route::get('/pengadaan/{id}/data', [ViewerPengadaanController::class, 'detailData'])->name('pengadaan.detail-data');
+        Route::get('/pengadaan', [UserPengadaanController::class, 'index'])->name('pengadaan');
+        Route::get('/pengadaan/data', [UserPengadaanController::class, 'data'])->name('pengadaan.data');
+        Route::get('/pengadaan/{id}', [UserPengadaanController::class, 'detail'])->name('pengadaan.detail');
+        Route::get('/pengadaan/{id}/data', [UserPengadaanController::class, 'detailData'])->name('pengadaan.detail-data');
 
         // PNBP (read-only)
-        Route::get('/pnbp', [ViewerPnbpController::class, 'index'])->name('pnbp');
-        Route::get('/pnbp/data', [ViewerPnbpController::class, 'data'])->name('pnbp.data');
+        Route::get('/pnbp', [UserPnbpController::class, 'index'])->name('pnbp');
+        Route::get('/pnbp/data', [UserPnbpController::class, 'data'])->name('pnbp.data');
     });

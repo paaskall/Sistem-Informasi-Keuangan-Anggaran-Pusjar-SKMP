@@ -49,6 +49,9 @@ class DashboardController extends Controller
             'akselerasi' => $this->service->getAkselerasi($tahun),
             'kendala_pengadaan' => $this->service->getKendalaPengadaan($tahun),
             'rencana_pengadaan' => $this->service->getRencanaPengadaan($tahun),
+
+            // WIDGET BARU: UPCOMING TASKS
+            'upcoming_tasks' => $this->service->getUpcomingTasks(5),
         ]);
     }
 }

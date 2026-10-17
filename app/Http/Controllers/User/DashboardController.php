@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Viewer;
+namespace App\Http\Controllers\User;
 
 use App\Helpers\TahunHelper;
 use App\Http\Controllers\Controller;
@@ -22,7 +22,7 @@ class DashboardController extends Controller
             $tahun = (int) date('Y');
         }
 
-        return view('viewer.dashboard', [
+        return view('user.dashboard', [
             'tahun' => $tahun,
             'tahunOptions' => [2026, 2025, 2024],
             'tahunBerjalan' => TahunHelper::tahunBerjalan(),

@@ -25,9 +25,13 @@ class User extends Authenticatable
         ];
     }
 
+    // ============================================================
+    // ROLE CHECKERS
+    // ============================================================
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin_keuangan';
     }
 
     public function isKeuangan(): bool
@@ -40,21 +44,38 @@ class User extends Authenticatable
         return $this->role === 'pimpinan';
     }
 
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    // ============================================================
+    // ROLE LABEL
+    // ============================================================
+
     public function getRoleLabelAttribute(): string
     {
         return match ($this->role) {
-            'admin' => 'Administrator',
-            'keuangan' => 'User Keuangan',
-            'pimpinan' => 'Pimpinan',
-            'viewer' => 'Viewer',
-            default => $this->role,
+            'admin_keuangan' => 'Admin Keuangan',
+            'keuangan'       => 'User Keuangan',
+            'pimpinan'       => 'Pimpinan',
+            'user'           => 'User',
+            default          => $this->role,
         };
     }
+
+    // ============================================================
+    // ACCESSOR
+    // ============================================================
 
     public function getInitialAttribute(): string
     {
         return strtoupper(substr($this->name, 0, 1));
     }
+
+    // ============================================================
+    // RELATIONS
+    // ============================================================
 
     public function kendalas()
     {
@@ -71,6 +92,10 @@ class User extends Authenticatable
         return $this->hasMany(AuditTrail::class);
     }
 
+    // ============================================================
+    // SCOPES
+    // ============================================================
+
     public function scopeActive($query)
     {
         return $query->where('active', true);
@@ -79,10 +104,5 @@ class User extends Authenticatable
     public function scopeByRole($query, string $role)
     {
         return $query->where('role', $role);
-    }
-
-    public function isViewer(): bool
-    {
-        return $this->role === 'viewer';
     }
 }

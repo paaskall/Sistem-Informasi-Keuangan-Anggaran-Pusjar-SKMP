@@ -10,7 +10,7 @@ class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->role === 'admin';
+        return auth()->check() && auth()->user()->role === 'admin_keuangan';
     }
 
     public function rules(): array
@@ -37,7 +37,7 @@ class UpdateUserRequest extends FormRequest
                     ->symbols()
                     ->uncompromised(),
             ],
-            'role' => ['required', 'in:admin,keuangan,pimpinan,viewer'],
+            'role' => ['required', 'in:admin_keuangan,keuangan,pimpinan,user'],
             'unit' => ['required', 'string', 'max:255'],
         ];
     }

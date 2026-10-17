@@ -8,7 +8,7 @@
         title="Pengadaan"
         subtitle="Pantau progress paket pengadaan"
         :breadcrumb="[
-            ['label' => 'Dashboard', 'url' => route('viewer.dashboard')],
+            ['label' => 'Dashboard', 'url' => route('user.dashboard')],
             ['label' => 'Pengadaan'],
         ]"
     />
@@ -60,8 +60,8 @@
 <script>
 window.PENGADAAN_DATA = {
     routes: {
-        data: @json(route('viewer.pengadaan.data')),
-        detail: @json(route('viewer.pengadaan.detail', ['id' => '__ID__'])),
+        data: @json(route('user.pengadaan.data')),
+        detail: @json(route('user.pengadaan.detail', ['id' => '__ID__'])),
     },
     csrf: @json(csrf_token()),
 };
@@ -73,5 +73,5 @@ window.PENGADAAN_DATA = {
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/pages/pengadaan-viewer.js') }}?v={{ filemtime(public_path('js/pages/pengadaan-viewer.js')) }}"></script>
+<script src="{{ asset('js/pages/pengadaan-user.js') }}?v={{ filemtime(public_path('js/pages/pengadaan-user.js')) }}"></script>
 @endpush

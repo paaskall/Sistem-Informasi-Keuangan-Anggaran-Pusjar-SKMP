@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'SIKAP - Dashboard Viewer')
+@section('title', 'SIKAP - Dashboard User')
 
 @section('content')
 <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
@@ -8,7 +8,7 @@
         title="Dashboard Keuangan"
         subtitle="Ringkasan eksekutif tahun {{ $tahun }}"
         :breadcrumb="[
-            ['label' => 'Dashboard Viewer'],
+            ['label' => 'Dashboard User'],
         ]"
     />
     <div class="flex gap-2 items-center">
@@ -85,9 +85,9 @@
 window.DASHBOARD_DATA = {
     initialTahun: @json($tahun),
     tahunBerjalan: @json($tahunBerjalan),
-    role: 'viewer',
+    role: 'user',
     routes: {
-        data: @json(route('viewer.dashboard.data')),
+        data: @json(route('user.dashboard.data')),
     },
     csrf: @json(csrf_token()),
 };

@@ -139,11 +139,11 @@ class LoginController extends Controller
         if (!$user) return route('login');
 
         return match ($user->role) {
-            'admin' => route('admin.dashboard'),
-            'keuangan' => route('keuangan.dashboard'),
-            'pimpinan' => route('pimpinan.dashboard'),
-            'viewer' => route('viewer.dashboard'),
-            default => route('login'),
+            'admin_keuangan' => route('admin.dashboard'),
+            'keuangan'       => route('keuangan.dashboard'),
+            'pimpinan'       => route('pimpinan.dashboard'),
+            'user'           => route('user.dashboard'),
+            default          => route('login'),
         };
     }
 

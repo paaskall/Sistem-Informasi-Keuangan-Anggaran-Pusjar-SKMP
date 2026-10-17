@@ -36,6 +36,11 @@
     </div>
 </div>
 
+{{-- WIDGET UPCOMING TASKS --}}
+<div class="mb-6">
+    <x-widget.task-upcoming title="Task Mendatang" :limit="5" />
+</div>
+
 {{-- MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA) --}}
 <div id="catatan-kendala-container" class="mb-6"></div>
 
