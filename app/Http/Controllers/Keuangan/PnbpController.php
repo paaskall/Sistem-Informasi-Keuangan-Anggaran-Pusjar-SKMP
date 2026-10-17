@@ -103,4 +103,15 @@ class PnbpController extends Controller
             'message' => 'PNBP tahun ' . $pnbp->tahun . ' berhasil dihapus.',
         ]);
     }
+
+    /**
+     * Endpoint reminder untuk halaman PNBP.
+     */
+    public function reminders(\App\Services\ReminderService $service): JsonResponse
+    {
+        return response()->json([
+            'ok' => true,
+            'reminders' => $service->getReminders(),
+        ]);
+    }
 }

@@ -1,6 +1,6 @@
 // ============================================================
 // SIKAP - Dashboard (Keuangan & Pimpinan & User)
-// Versi aman XSS
+// Versi aman XSS + SweetAlert Login + Widget Pengingat
 // ============================================================
 
 (function () {
@@ -84,7 +84,7 @@
         renderKendalaPengadaan(d.kendala_pengadaan);
         renderRencanaPengadaan(d.rencana_pengadaan);
         renderBulanIni(d.bulan_ini);
-        renderUpcomingTasks(d.upcoming_tasks);   // ⬅️ TAMBAH
+        renderUpcomingTasks(d.upcoming_tasks);
         if (d.ringkasan_modul) renderRingkasanModul(d.ringkasan_modul);
         updateArsipBanner();
 
@@ -92,6 +92,192 @@
         if (labelEl) labelEl.textContent = currentTahun;
         const chTahun = document.getElementById('chart-tahun');
         if (chTahun) chTahun.textContent = currentTahun;
+    }
+
+    // ============================================================
+    // SWEETALERT PENGINGAT + RENDER WIDGET
+    // ============================================================
+    function showLoginReminder() {
+        fetch('/keuangan/reminders', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(d => {
+            const data = d.reminders || d;
+            if (!data) return;
+
+            // Render widget pengingat (jika ada elemen di halaman)
+            renderReminderWidget(data);
+
+            // Tampilkan SweetAlert saat login
+            if (DATA.showReminderOnLoad && data.total > 0) {
+                showReminderAlert(data);
+            }
+        })
+        .catch(e => console.error('[Reminder] Fetch error:', e));
+    }
+
+    // ============================================================
+    // RENDER WIDGET PENGINGAT
+    // ============================================================
+    function renderReminderWidget(data) {
+        const widget = document.getElementById('reminder-widget');
+        if (!widget) return;
+
+        if (!data || data.total === 0) {
+            widget.classList.add('hidden');
+            return;
+        }
+
+        widget.classList.remove('hidden');
+
+        const subtitle = document.getElementById('reminder-subtitle');
+        const total = document.getElementById('reminder-total');
+        const body = document.getElementById('reminder-body');
+
+        if (subtitle) {
+            const namaBulan = data.periode?.bulan_nama || 'Bulan Ini';
+            subtitle.textContent = data.is_late_month
+                ? `Akhir bulan ${namaBulan} - segera lengkapi`
+                : `${namaBulan} ${data.periode?.tahun || ''}`;
+        }
+        if (total) total.textContent = data.total;
+
+        let html = '';
+
+        if (data.realisasi && data.realisasi.count > 0) {
+            html += `
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-red-700"></i>
+                            </div>
+                            <p class="text-xs font-bold text-red-800">Realisasi Belum Lengkap</p>
+                        </div>
+                        <span class="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                            ${data.realisasi.count} item
+                        </span>
+                    </div>
+                    <div class="space-y-1.5">
+                        ${data.realisasi.items.slice(0, 5).map(item => `
+                            <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-red-50/50 border border-red-100">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[11px] font-semibold text-gray-800 truncate">${escapeHtml(item.nama)}</p>
+                                    <p class="text-[10px] text-gray-500">${rp(item.realisasi)} / ${rp(item.target)}</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-red-700 whitespace-nowrap">${item.capaian}%</span>
+                            </div>
+                        `).join('')}
+                        ${data.realisasi.count > 5 ? `<p class="text-[10px] text-red-600 text-center pt-1 font-semibold">+ ${data.realisasi.count - 5} komponen lainnya</p>` : ''}
+                    </div>
+                    <a href="/keuangan/realisasi" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-700 hover:underline">
+                        Input Sekarang
+                        <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+            `;
+        }
+
+        if (data.pnbp && data.pnbp.count > 0) {
+            html += `
+                <div class="${data.realisasi && data.realisasi.count > 0 ? 'pt-3 border-t border-gray-100' : ''}">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="receipt" class="w-3.5 h-3.5 text-amber-700"></i>
+                            </div>
+                            <p class="text-xs font-bold text-amber-800">PNBP Belum Capai Target</p>
+                        </div>
+                        <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                            ${data.pnbp.count} kategori
+                        </span>
+                    </div>
+                    <div class="space-y-1.5">
+                        ${data.pnbp.items.slice(0, 5).map(item => `
+                            <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-amber-50/50 border border-amber-100">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[11px] font-semibold text-gray-800 truncate">${escapeHtml(item.nama)}</p>
+                                    <p class="text-[10px] text-gray-500">${rp(item.realisasi)} / ${rp(item.target)}</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-amber-700 whitespace-nowrap">${item.capaian}%</span>
+                            </div>
+                        `).join('')}
+                        ${data.pnbp.count > 5 ? `<p class="text-[10px] text-amber-600 text-center pt-1 font-semibold">+ ${data.pnbp.count - 5} kategori lainnya</p>` : ''}
+                    </div>
+                    <a href="/keuangan/pnbp" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 hover:underline">
+                        Kelola PNBP
+                        <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+            `;
+        }
+
+        if (body) body.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
+    // TAMPILKAN SWEETALERT
+    // ============================================================
+    function showReminderAlert(data) {
+        let listHtml = '';
+        if (data.realisasi && data.realisasi.count > 0) {
+            listHtml += `
+                <li class="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-100">
+                    <div class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-red-800">${data.realisasi.count} Komponen Realisasi</p>
+                        <p class="text-[11px] text-red-600 mt-0.5">Belum mencapai target 100% bulan ini.</p>
+                    </div>
+                </li>
+            `;
+        }
+        if (data.pnbp && data.pnbp.count > 0) {
+            listHtml += `
+                <li class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                    <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-amber-800">${data.pnbp.count} Kategori PNBP</p>
+                        <p class="text-[11px] text-amber-600 mt-0.5">Belum mencapai target tahun ini.</p>
+                    </div>
+                </li>
+            `;
+        }
+
+        Swal.fire({
+            title: '',
+            html: `
+                <div class="text-left">
+                    <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Pengingat Input</h3>
+                            <p class="text-xs text-gray-500">Halo, ada beberapa data yang perlu dilengkapi:</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-2.5">${listHtml}</ul>
+                    <p class="text-[11px] text-gray-400 mt-4 text-center">Silakan cek widget pengingat di dashboard.</p>
+                </div>
+            `,
+            showConfirmButton: true,
+            confirmButtonText: 'Mengerti',
+            confirmButtonColor: '#0A669D',
+            customClass: { 
+                popup: 'rounded-2xl p-6',
+                confirmButton: 'px-6 py-2.5 text-sm font-semibold rounded-lg shadow-sm'
+            },
+            buttonsStyling: false
+        });
     }
 
     // ============================================================
@@ -1096,7 +1282,6 @@
         const itemsHtml = tasks.map(t => {
             const cfg = statusConfig[t.status] || statusConfig.belum;
 
-            // Label waktu (dengan icon)
             let timeIcon = 'calendar';
             let timeLabel = '';
             let timeColor = 'text-gray-500';
@@ -1279,5 +1464,9 @@
     // ============================================================
     // INIT
     // ============================================================
-    document.addEventListener('DOMContentLoaded', loadData);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData().then(() => {
+            showLoginReminder();
+        });
+    });
 })();

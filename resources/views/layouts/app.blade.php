@@ -78,12 +78,12 @@
 
 <div class="min-h-screen bg-gray-50">
 
-    {{-- ============ SIDEBAR DESKTOP (Fixed) ============ --}}
+    {{-- SIDEBAR DESKTOP --}}
     <aside class="w-64 bg-white border-r border-gray-200 flex-col hidden md:flex fixed inset-y-0 left-0 z-30">
         <x-layout.sidebar :active="$active ?? null" />
     </aside>
 
-    {{-- ============ SIDEBAR MOBILE ============ --}}
+    {{-- SIDEBAR MOBILE --}}
     <aside id="mobileSidebar"
            class="w-64 bg-white border-r border-gray-200 flex-col hidden fixed inset-y-0 left-0 z-40 shadow-2xl">
         <x-layout.sidebar :active="$active ?? null" />
@@ -93,7 +93,7 @@
          style="z-index: 35;"
          onclick="closeMobileSidebar()"></div>
 
-    {{-- ============ MAIN ============ --}}
+    {{-- MAIN --}}
     <div class="md:ml-64 flex flex-col min-h-screen">
         <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-20">
             <x-layout.topbar />

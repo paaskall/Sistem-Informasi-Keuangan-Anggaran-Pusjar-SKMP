@@ -19,21 +19,45 @@ class Pnbp extends Model
         'tahun' => 'integer',
     ];
 
-    // ============ RELATIONSHIPS ============
+    // Cache internal
+    private ?float $_cachedTotalTarget = null;
+    private ?float $_cachedTotalRealisasi = null;
+
     public function details()
     {
         return $this->hasMany(PnbpDetail::class);
     }
 
-    // ============ ACCESSORS ============
+    // ============ ACCESSORS (dengan cache) ============
+
     public function getTotalTargetAttribute(): float
     {
-        return (float) $this->details->sum('target');
+        if ($this->_cachedTotalTarget !== null) {
+            return $this->_cachedTotalTarget;
+        }
+
+        if ($this->relationLoaded('details')) {
+            $sum = (float) $this->details->sum('target');
+        } else {
+            $sum = (float) $this->details()->sum('target');
+        }
+
+        return $this->_cachedTotalTarget = $sum;
     }
 
     public function getTotalRealisasiAttribute(): float
     {
-        return (float) $this->details->sum('realisasi');
+        if ($this->_cachedTotalRealisasi !== null) {
+            return $this->_cachedTotalRealisasi;
+        }
+
+        if ($this->relationLoaded('details')) {
+            $sum = (float) $this->details->sum('realisasi');
+        } else {
+            $sum = (float) $this->details()->sum('realisasi');
+        }
+
+        return $this->_cachedTotalRealisasi = $sum;
     }
 
     public function getCapaianAttribute(): int
@@ -44,6 +68,7 @@ class Pnbp extends Model
     }
 
     // ============ SCOPES ============
+
     public function scopeTahun($query, $tahun)
     {
         return $query->where('tahun', $tahun);

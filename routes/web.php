@@ -174,6 +174,9 @@ Route::prefix('keuangan')
         Route::put('/akselerasi/{id}', [AkselerasiController::class, 'update'])->name('akselerasi.update');
         Route::delete('/akselerasi/{id}', [AkselerasiController::class, 'destroy'])->name('akselerasi.destroy');
 
+        // Reminder
+        Route::get('/reminders', [KeuanganDashboardController::class, 'reminders'])->name('reminders');
+
         // Task Bulanan (Reminder Kalender)
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::get('/', [KeuanganTaskController::class, 'index'])->name('index');

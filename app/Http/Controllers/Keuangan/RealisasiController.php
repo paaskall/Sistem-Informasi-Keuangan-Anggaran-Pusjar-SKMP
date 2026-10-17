@@ -178,4 +178,15 @@ class RealisasiController extends Controller
             'target' => $target,
         ]);
     }
+
+    /**
+     * Endpoint reminder untuk halaman realisasi.
+     */
+    public function reminders(\App\Services\ReminderService $service): JsonResponse
+    {
+        return response()->json([
+            'ok' => true,
+            'reminders' => $service->getReminders(),
+        ]);
+    }
 }

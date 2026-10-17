@@ -22,10 +22,15 @@ class DashboardController extends Controller
             $tahun = (int) date('Y');
         }
 
+        // Ambil flag SweetAlert, lalu hapus dari session
+        $showReminder = session('show_login_reminder', false);
+        session()->forget('show_login_reminder');
+
         return view('keuangan.dashboard', [
             'tahun' => $tahun,
             'tahunOptions' => [2026, 2025, 2024],
             'tahunBerjalan' => TahunHelper::tahunBerjalan(),
+            'showReminder' => $showReminder,
         ]);
     }
 
@@ -43,15 +48,19 @@ class DashboardController extends Controller
             'rencana_bulan_ini' => $this->service->getRencanaRealisasiBulanIni($tahun),
             'progress_pengadaan' => $this->service->getProgressPengadaan(3),
             'pnbp_summary' => $this->service->getPnbpSummary($tahun),
-
-            // 3 SECTION BARU
             'catatan_kendala' => $this->service->getCatatanKendala($tahun),
             'akselerasi' => $this->service->getAkselerasi($tahun),
             'kendala_pengadaan' => $this->service->getKendalaPengadaan($tahun),
             'rencana_pengadaan' => $this->service->getRencanaPengadaan($tahun),
-
-            // WIDGET BARU: UPCOMING TASKS
             'upcoming_tasks' => $this->service->getUpcomingTasks(5),
+        ]);
+    }
+
+    public function reminders(\App\Services\ReminderService $reminderService): JsonResponse
+    {
+        return response()->json([
+            'ok' => true,
+            'reminders' => $reminderService->getReminders(),
         ]);
     }
 }

@@ -17,6 +17,10 @@ class Target extends Model
         'bulan' => 'integer',
     ];
 
+    // Cache internal (bukan DB) — biar akses berulang tidak query ulang
+    private ?float $_cachedTotalNominal = null;
+    private ?float $_cachedTotalRealisasi = null;
+
     public function details()
     {
         return $this->hasMany(TargetDetail::class);
@@ -32,35 +36,53 @@ class Target extends Model
         return $this->hasMany(Kendala::class);
     }
 
-    // ============ ACCESSORS ============
+    // ============ ACCESSORS (dengan cache) ============
+
     public function getTotalNominalAttribute(): float
     {
-        return (float) $this->details->sum('nominal');
+        if ($this->_cachedTotalNominal !== null) {
+            return $this->_cachedTotalNominal;
+        }
+
+        if ($this->relationLoaded('details')) {
+            $sum = (float) $this->details->sum('nominal');
+        } else {
+            $sum = (float) $this->details()->sum('nominal');
+        }
+
+        return $this->_cachedTotalNominal = $sum;
     }
 
     public function getTotalRealisasiAttribute(): float
     {
-        return (float) $this->realisasis->sum('nominal');
+        if ($this->_cachedTotalRealisasi !== null) {
+            return $this->_cachedTotalRealisasi;
+        }
+
+        if ($this->relationLoaded('realisasis')) {
+            $sum = (float) $this->realisasis->sum('nominal');
+        } else {
+            $sum = (float) $this->realisasis()->sum('nominal');
+        }
+
+        return $this->_cachedTotalRealisasi = $sum;
     }
 
     public function getCapaianAttribute(): int
     {
         $target = $this->total_nominal;
-        if ($target <= 0) {
-            return 0;
-        }
+        if ($target <= 0) return 0;
         return (int) round(($this->total_realisasi / $target) * 100);
     }
 
     public function getBulanNamaAttribute(): string
     {
-        $bulan = [
+        return [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
             4 => 'April', 5 => 'Mei', 6 => 'Juni',
             7 => 'Juli', 8 => 'Agustus', 9 => 'September',
             10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-        ];
-        return $bulan[$this->bulan] ?? '-';
+        ][$this->bulan] ?? '-';
     }
 
     public function getBulanShortAttribute(): string
@@ -69,7 +91,6 @@ class Target extends Model
         return $bulan[$this->bulan - 1] ?? '-';
     }
 
-    // ============ SCOPES ============
     public function scopeTahun($query, $tahun)
     {
         return $query->where('tahun', $tahun);
