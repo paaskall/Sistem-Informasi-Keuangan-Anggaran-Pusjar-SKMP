@@ -17,4 +17,21 @@
             <p class="text-[10px] text-gray-400 mt-2">Memuat...</p>
         </div>
     </div>
+
+    {{-- AI INSIGHT SLOT --}}
+    <div id="ai-insight-container" class="border-t border-gray-100 p-4 hidden">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
+            </div>
+            <p class="text-xs font-bold text-gray-800">Rekomendasi AI</p>
+            <span class="text-[9px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">Gemini</span>
+        </div>
+        <div id="ai-insight-body">
+            <div class="text-center py-3">
+                <i data-lucide="loader" class="w-4 h-4 mx-auto text-gray-300 animate-spin"></i>
+                <p class="text-[10px] text-gray-400 mt-1">Menganalisa prioritas...</p>
+            </div>
+        </div>
+    </div>
 </div>

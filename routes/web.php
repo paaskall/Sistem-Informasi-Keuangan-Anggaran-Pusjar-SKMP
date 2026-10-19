@@ -176,6 +176,9 @@ Route::prefix('keuangan')
 
         // Reminder
         Route::get('/reminders', [KeuanganDashboardController::class, 'reminders'])->name('reminders');
+        // AI Insight
+        Route::get('/ai-insight', [\App\Http\Controllers\Keuangan\AiInsightController::class, 'analyze'])
+            ->name('ai-insight');
 
         // Task Bulanan (Reminder Kalender)
         Route::prefix('tasks')->name('tasks.')->group(function () {

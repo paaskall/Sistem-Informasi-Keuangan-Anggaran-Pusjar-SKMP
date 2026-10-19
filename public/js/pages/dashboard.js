@@ -146,6 +146,7 @@
 
         let html = '';
 
+        // Realisasi section (SAMA)
         if (data.realisasi && data.realisasi.count > 0) {
             html += `
                 <div>
@@ -170,16 +171,15 @@
                                 <span class="text-[10px] font-bold text-red-700 whitespace-nowrap">${item.capaian}%</span>
                             </div>
                         `).join('')}
-                        ${data.realisasi.count > 5 ? `<p class="text-[10px] text-red-600 text-center pt-1 font-semibold">+ ${data.realisasi.count - 5} komponen lainnya</p>` : ''}
                     </div>
                     <a href="/keuangan/realisasi" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-700 hover:underline">
-                        Input Sekarang
-                        <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        Input Sekarang <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </a>
                 </div>
             `;
         }
 
+        // PNBP section (SAMA)
         if (data.pnbp && data.pnbp.count > 0) {
             html += `
                 <div class="${data.realisasi && data.realisasi.count > 0 ? 'pt-3 border-t border-gray-100' : ''}">
@@ -204,11 +204,9 @@
                                 <span class="text-[10px] font-bold text-amber-700 whitespace-nowrap">${item.capaian}%</span>
                             </div>
                         `).join('')}
-                        ${data.pnbp.count > 5 ? `<p class="text-[10px] text-amber-600 text-center pt-1 font-semibold">+ ${data.pnbp.count - 5} kategori lainnya</p>` : ''}
                     </div>
                     <a href="/keuangan/pnbp" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 hover:underline">
-                        Kelola PNBP
-                        <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        Kelola PNBP <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </a>
                 </div>
             `;
@@ -216,6 +214,86 @@
 
         if (body) body.innerHTML = html;
         if (window.lucide) lucide.createIcons();
+
+        // ⬇️ TAMBAH: Panggil AI Insight
+        if (data.realisasi && data.realisasi.count > 0) {
+            loadAiInsight();
+        }
+    }
+
+    // ============================================================
+    // AI INSIGHT (GEMINI)
+    // ============================================================
+    function loadAiInsight() {
+        const container = document.getElementById('ai-insight-container');
+        const body = document.getElementById('ai-insight-body');
+        if (!container || !body) return;
+
+        container.classList.remove('hidden');
+        body.innerHTML = `
+            <div class="text-center py-3">
+                <i data-lucide="loader" class="w-4 h-4 mx-auto text-purple-400 animate-spin"></i>
+                <p class="text-[10px] text-gray-400 mt-1">Menganalisa prioritas...</p>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
+
+        fetch('/keuangan/ai-insight', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (!d.ok || !d.insight) {
+                body.innerHTML = `
+                    <div class="text-center py-3 text-xs text-gray-400">
+                        <i data-lucide="info" class="w-4 h-4 mx-auto text-gray-300 mb-1"></i>
+                        AI tidak tersedia. Cek API key.
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            const ai = d.insight;
+            const keyakinanColor = ai.tingkat_keyakinan === 'tinggi' ? 'text-green-700 bg-green-100'
+                                 : ai.tingkat_keyakinan === 'sedang' ? 'text-blue-700 bg-blue-100'
+                                 : 'text-amber-700 bg-amber-100';
+
+            body.innerHTML = `
+                <div class="space-y-3">
+                    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-lg p-3">
+                        <div class="flex items-start gap-2 mb-2">
+                            <div class="w-6 h-6 rounded-full bg-purple-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="star" class="w-3 h-3"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[10px] font-bold text-purple-700 uppercase tracking-wider">Prioritas Utama</p>
+                                <p class="text-xs font-bold text-gray-800 mt-0.5">${escapeHtml(ai.prioritas_utama)}</p>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">${escapeHtml(ai.alasan)}</p>
+                    </div>
+
+                    <div class="bg-white border border-gray-100 rounded-lg p-3">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Strategi AI</p>
+                        <p class="text-[11px] text-gray-700 leading-relaxed">${escapeHtml(ai.strategi)}</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold ${keyakinanColor} px-2 py-0.5 rounded-full">
+                            Keyakinan: ${escapeHtml(ai.tingkat_keyakinan)}
+                        </span>
+                        <span class="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                            Estimasi: ${escapeHtml(ai.estimasi_selesai)}
+                        </span>
+                    </div>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        })
+        .catch(e => {
+            console.error('[AI Insight] Error:', e);
+            body.innerHTML = `<div class="text-center py-3 text-xs text-gray-400">Gagal memuat analisa AI.</div>`;
+        });
     }
 
     // ============================================================
