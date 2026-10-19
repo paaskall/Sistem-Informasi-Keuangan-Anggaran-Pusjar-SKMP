@@ -95,7 +95,6 @@
 
         @foreach ($section['items'] as $item)
             @php
-                // Fix: support query string (?tab=program) & tanpa query
                 $itemUrl = $item['url'];
                 $itemUrlNoQuery = strtok($itemUrl, '?');
                 $isActive = request()->fullUrl() === $itemUrl
@@ -135,3 +134,12 @@
         </a>
     </div>
 @endif
+
+{{-- Menu Tentang Aplikasi --}}
+<nav class="border-t border-gray-100 py-2 flex-shrink-0">
+    <a href="{{ route('about') }}" onclick="closeMobileSidebar()"
+       class="flex items-center gap-3 px-5 py-2.5 text-label border-l-4 transition-blueprint group {{ request()->routeIs('about') ? 'bg-info-bg text-brand-primary border-brand-primary font-semibold' : 'text-slate border-transparent hover:bg-info-bg hover:text-brand-primary' }}">
+        <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="truncate">Tentang Aplikasi</span>
+    </a>
+</nav>
