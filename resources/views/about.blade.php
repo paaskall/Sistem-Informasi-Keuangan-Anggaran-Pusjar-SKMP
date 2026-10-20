@@ -5,6 +5,8 @@
 @section('content')
 @php
     $info = config('app-info');
+    $user = auth()->user();
+    $role = $user?->role;
 @endphp
 
 <div class="max-w-4xl mx-auto space-y-6">
@@ -104,40 +106,67 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <i data-lucide="users" class="w-5 h-5 text-purple-600"></i>
-            Tim Pengembang
+            Pengembang
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @foreach($info['team'] as $member)
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            {{-- Bungkus dengan <a> jika mengarah ke link eksternal --}}
+            <a href="https://aboutpaskal.vercel.app/" target="_blank" rel="noopener noreferrer" 
+            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 hover:border-purple-200 border border-transparent transition group cursor-pointer">
                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center flex-shrink-0 text-white text-lg font-bold shadow-sm">
                     {{ $member['initial'] }}
                 </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-bold text-gray-800">{{ $member['name'] }}</p>
-                    <p class="text-xs text-gray-500">{{ $member['role'] }}</p>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-bold text-gray-800 group-hover:text-purple-700 transition">{{ $member['name'] }}</p>
+                    <p class="text-xs text-gray-500 group-hover:text-purple-600 transition">{{ $member['role'] }}</p>
                 </div>
-            </div>
+                {{-- Tambahkan icon external link agar user tahu ini bisa diklik --}}
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-gray-400 group-hover:text-purple-600 transition"></i>
+            </a>
             @endforeach
         </div>
     </div>
 
-    {{-- TAUTAN --}}
+    {{-- TAUTAN PENTING (SEMUA ROLE) --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
         <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <i data-lucide="link" class="w-5 h-5 text-blue-700"></i>
             Tautan Penting
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            @foreach($info['links'] as $link)
-            <a href="{{ $link['url'] }}" target="_blank"
+
+            {{-- Dokumentasi (SEMUA ROLE) --}}
+            <a href="{{ route('documentation') }}"
                class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-200 rounded-lg transition group">
                 <div class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-blue-300 group-hover:bg-blue-100">
-                    <i data-lucide="{{ $link['icon'] }}" class="w-4 h-4 text-gray-600 group-hover:text-blue-700"></i>
+                    <i data-lucide="book-open" class="w-4 h-4 text-gray-600 group-hover:text-blue-700"></i>
                 </div>
-                <span class="text-sm font-semibold text-gray-800 group-hover:text-blue-700">{{ $link['label'] }}</span>
-                <i data-lucide="arrow-up-right" class="w-3 h-3 text-gray-400 group-hover:text-blue-700 ml-auto"></i>
+                <span class="text-sm font-semibold text-gray-800 group-hover:text-blue-700">Dokumentasi</span>
+                <i data-lucide="arrow-right" class="w-3 h-3 text-gray-400 group-hover:text-blue-700 ml-auto"></i>
             </a>
-            @endforeach
+
+            {{-- Changelog (SEMUA ROLE) --}}
+            <a href="{{ route('changelog') }}"
+               class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-200 rounded-lg transition group">
+                <div class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-blue-300 group-hover:bg-blue-100">
+                    <i data-lucide="list" class="w-4 h-4 text-gray-600 group-hover:text-blue-700"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-800 group-hover:text-blue-700">Changelog</span>
+                <i data-lucide="arrow-right" class="w-3 h-3 text-gray-400 group-hover:text-blue-700 ml-auto"></i>
+            </a>
+
+            {{-- Laporkan Bug (Keuangan & Admin Keuangan) --}}
+            @if(in_array($role, ['keuangan', 'admin_keuangan']))
+            <a href="{{ route('bug-report.index') }}"
+               class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-amber-50 border border-gray-100 hover:border-amber-200 rounded-lg transition group">
+                <div class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-amber-300 group-hover:bg-amber-100">
+                    <i data-lucide="bug" class="w-4 h-4 text-gray-600 group-hover:text-amber-700"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-800 group-hover:text-amber-700">Laporkan Bug</span>
+                <i data-lucide="arrow-right" class="w-3 h-3 text-gray-400 group-hover:text-amber-700 ml-auto"></i>
+            </a>
+            @endif
+
         </div>
     </div>
 

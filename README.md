@@ -1,59 +1,176 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIKAP - Sistem Informasi Keuangan & Anggaran Pusjar SKMP
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi terintegrasi untuk pengelolaan target, realisasi anggaran, PNBP, pengadaan, dan analisa keuangan menggunakan kecerdasan buatan (AI) Gemini. Dirancang khusus untuk mendukung efisiensi kerja di lingkungan Pusjar SKMP LAN RI.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?style=flat&logo=php)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=flat&logo=tailwind-css)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat&logo=mysql)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Daftar Isi
+1. [Fitur Utama](#-fitur-utama)
+2. [Prasyarat Sistem](#-prasyarat-sistem)
+3. [Cara Instalasi](#-cara-instalasi)
+4. [Akun Default (Seeder)](#-akun-default-seeder)
+5. [Struktur Direktori](#-struktur-direktori)
+6. [Konfigurasi AI Gemini](#-konfigurasi-ai-gemini)
+7. [Lisensi](#-lisensi)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🚀 Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Multi-Role**: Akses berbeda untuk Admin Keuangan, User Keuangan, Pimpinan, dan User (Viewer).
+- **Modul Perencanaan**: Kelola Target dan Realisasi per komponen belanja.
+- **Modul Pelaksanaan**: Manajemen paket pengadaan, tahapan, dan kendala.
+- **Modul Pelaporan**: PNBP, Laporan Bulanan (Export PDF/CSV), Akselerasi Penyerapan.
+- **Pengingat Otomatis**: Notifikasi widget dan SweetAlert untuk komponen yang belum 100%.
+- **Analisa AI Gemini**: Rekomendasi cerdas prioritas realisasi dengan AI.
+- **Task Bulanan**: Kalender agenda dan reminder task dengan dukungan assignee.
+- **Keamanan**: Audit trail, CSRF protection, password policy ketat, dan konfirmasi password untuk aksi sensitif.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🛠️ Prasyarat Sistem
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Sebelum menjalankan aplikasi, pastikan server Anda memenuhi persyaratan berikut:
 
-### Premium Partners
+- **PHP** >= 8.3 (dengan ekstensi `pdo`, `mbstring`, `openssl`, `xml`, `curl`, `bcmath`)
+- **Composer** >= 2.x
+- **Node.js** & **NPM** (untuk build frontend)
+- **MySQL** >= 8.0 atau **MariaDB** >= 10.5
+- **Git**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## ⚙️ Cara Instalasi (Local Development)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Ikuti langkah-langkah di bawah ini untuk menjalankan SIKAP di komputer lokal Anda.
 
-## Code of Conduct
+### 1. Clone Repositori
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+git clone <URL_REPOSITORY_ANDA> sikap
+cd sikap
 
-## Security Vulnerabilities
+### 2. Install Dependensi PHP
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+composer install
 
-## License
+### 3. Konfigurasi Environment
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Copy file `.env.example` menjadi `.env`:
+
+cp .env.example .env
+
+Buka file `.env` dan sesuaikan konfigurasi database serta Gemini API:
+
+APP_NAME=SIKAP
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sikap
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Konfigurasi Gemini AI
+GEMINI_API_KEY=masukkan_api_key_anda_di_sini
+GEMINI_MODEL=gemini-2.0-flash
+
+> **Penting:** Dapatkan API Key Gemini secara gratis di [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+### 4. Generate Application Key
+
+php artisan key:generate
+
+### 5. Migrasi Database & Seeder
+
+Pastikan database `sikap` sudah dibuat di MySQL Anda, lalu jalankan:
+
+php artisan migrate --seed
+
+### 6. Link Storage (untuk upload avatar & lampiran)
+
+php artisan storage:link
+
+### 7. Jalankan Server
+
+php artisan serve
+
+Aplikasi akan berjalan di `http://127.0.0.1:8000`.
+
+---
+
+## 🔐 Akun Default (Seeder)
+
+Jika Anda menjalankan `--seed`, berikut adalah akun default yang bisa digunakan untuk login:
+
+| Role | Username | Password | Akses Utama |
+|---|---|---|---|
+| **Admin Keuangan** | admin | Admin!12345 | Master Data, Kelola User, Audit Trail |
+| **User Keuangan** | keuangan | Keuangan!12345 | Target, Realisasi, PNBP, Pengadaan |
+| **Pimpinan** | pimpinan | Pimpinan!12345 | Laporan (Read-Only), Audit Trail |
+| **User (Viewer)** | user | User!12345 | Dashboard & Data (Read-Only) |
+
+> **Peringatan Keamanan:** Segera ganti password default ini setelah login pertama kali melalui halaman Profile.
+
+---
+
+## 📁 Struktur Direktori
+
+Berikut adalah struktur direktori utama dari aplikasi SIKAP:
+
+sikap/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Models/
+│   ├── Services/
+│   └── Traits/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── public/
+│   └── js/pages/
+├── resources/
+│   └── views/
+└── routes/
+    └── web.php
+
+---
+
+## 🤖 Konfigurasi AI Gemini
+
+Aplikasi ini menggunakan **Gemini API** untuk fitur analisa prioritas realisasi.
+
+1. Daftar di [Google AI Studio](https://aistudio.google.com/).
+2. Buat API Key.
+3. Masukkan ke `.env` pada variabel `GEMINI_API_KEY`.
+
+> **Catatan:** Jika model yang Anda gunakan deprecated, ganti `GEMINI_MODEL` dengan model terbaru (misal `gemini-2.5-flash` atau `gemini-3.8-flash`) dan jalankan `php artisan config:clear`.
+
+---
+
+## 📝 Lisensi
+
+Proyek ini dilisensikan di bawah **MIT License**.
+
+---
+
+## 👨‍💻 Tim Pengembang
+
+- **Paskal Arvito Weni** - Full-Stack Developer
+  - [Portofolio](https://aboutpaskal.vercel.app/)
+
+---
+
+© 2026 Lembaga Administrasi Negara RI (LAN RI). All rights reserved.

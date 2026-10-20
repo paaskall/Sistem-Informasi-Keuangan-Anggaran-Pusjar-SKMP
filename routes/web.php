@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\MasterController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ChangelogController;
+use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\Keuangan\BugReportController;
 use App\Http\Controllers\Keuangan\DashboardController as KeuanganDashboardController;
 use App\Http\Controllers\Keuangan\KendalaController;
 use App\Http\Controllers\Keuangan\LaporanController as KeuanganLaporanController;
@@ -63,7 +66,7 @@ Route::middleware(['auth', 'role:admin_keuangan'])->group(function () {
 });
 
 // ============================================================
-// PROFILE & ABOUT (semua role)
+// PROFILE, ABOUT, DOCUMENTATION, CHANGELOG (semua role)
 // ============================================================
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -74,6 +77,23 @@ Route::middleware('auth')->group(function () {
 
     // About (semua role)
     Route::get('/about', [AboutController::class, 'index'])->name('about');
+
+    // Documentation (semua role)
+    Route::get('/documentation', [DocumentationController::class, 'index'])->name('documentation');
+
+    // Changelog (semua role)
+    Route::get('/changelog', [ChangelogController::class, 'index'])->name('changelog');
+});
+
+// ============================================================
+// BUG REPORT (Keuangan & Admin Keuangan)
+// ============================================================
+Route::middleware(['auth', 'role:keuangan,admin_keuangan'])->group(function () {
+    Route::prefix('bug-report')->name('bug-report.')->group(function () {
+        Route::get('/', [BugReportController::class, 'index'])->name('index');
+        Route::get('/data', [BugReportController::class, 'data'])->name('data');
+        Route::post('/', [BugReportController::class, 'store'])->name('store');
+    });
 });
 
 // ============================================================
@@ -85,12 +105,14 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+        // Master Data
         Route::get('/master', [MasterController::class, 'index'])->name('master');
         Route::get('/master/{tab}/items', [MasterController::class, 'items'])->name('master.items');
         Route::post('/master/{tab}', [MasterController::class, 'store'])->name('master.store');
         Route::put('/master/{tab}/{id}', [MasterController::class, 'update'])->name('master.update');
         Route::delete('/master/{tab}/{id}', [MasterController::class, 'destroy'])->name('master.destroy');
 
+        // User Management
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::get('/users/data', [UserController::class, 'data'])->name('users.data');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -98,6 +120,7 @@ Route::prefix('admin')
         Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
+        // Audit Trail
         Route::get('/audit', [AuditTrailController::class, 'index'])->name('audit');
         Route::get('/audit/data', [AuditTrailController::class, 'data'])->name('audit.data');
         Route::get('/audit/{id}', [AuditTrailController::class, 'show'])->name('audit.show');
