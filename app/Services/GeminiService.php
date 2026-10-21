@@ -11,15 +11,23 @@ class GeminiService
     public function analyzeRealisasi(array $reminders): ?array
     {
         $items = $reminders['realisasi']['items'] ?? [];
+        if (empty($items)) return null;
 
-        if (empty($items)) {
-            return null;
+        $tahun = $reminders['periode']['tahun'] ?? date('Y');
+        $bulan = $reminders['periode']['bulan'] ?? date('n');
+        $cacheKey = "gemini_analysis_{$tahun}_{$bulan}";
+
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
         }
 
-        $cacheKey = 'gemini_analysis_' . md5(json_encode($reminders));
-        return Cache::remember($cacheKey, config('gemini.cache_ttl', 3600), function () use ($reminders) {
-            return $this->callGemini($reminders);
-        });
+        $result = $this->callGemini($reminders);
+
+        if ($result !== null) {
+            Cache::put($cacheKey, $result, now()->addDays(30));
+        }
+
+        return $result;
     }
 
     protected function callGemini(array $reminders): ?array
@@ -35,7 +43,25 @@ class GeminiService
         $url = config('gemini.base_url') . "/models/{$model}:generateContent?key={$apiKey}";
 
         try {
-            $response = Http::timeout(config('gemini.timeout', 30))
+            // ⭐ KONFIGURASI cURL YANG LEBIH TOLERAN
+            $response = Http::withoutVerifying()
+                ->withOptions([
+                    'connect_timeout' => 15,
+                    'curl' => [
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4, // Paksa IPv4
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_SSL_VERIFYHOST => false,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, // Paksa HTTP/1.1
+                        CURLOPT_FORBID_REUSE => true,
+                        CURLOPT_FRESH_CONNECT => true,
+                    ],
+                ])
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Connection' => 'close',
+                ])
+                ->timeout(120) // Naikkan timeout total ke 120 detik
                 ->post($url, [
                     'contents' => [
                         [
@@ -46,7 +72,7 @@ class GeminiService
                     ],
                     'generationConfig' => [
                         'temperature' => 0.2,
-                        'maxOutputTokens' => 3000,   // ⬅️ NAIKKAN dari 800 → 3000
+                        'maxOutputTokens' => 3000,
                     ],
                 ]);
 
@@ -66,10 +92,6 @@ class GeminiService
                 return null;
             }
 
-            // Log raw response untuk debug
-            Log::info('[Gemini] Raw response', ['text' => substr($text, 0, 500)]);
-
-            // ⬇️ Ekstrak JSON dari text (robust)
             $parsed = $this->extractJson($text);
 
             if (!$parsed || !isset($parsed['prioritas_utama'])) {
@@ -84,22 +106,16 @@ class GeminiService
         }
     }
 
-    /**
-     * Ekstrak JSON dari teks — robust terhadap markdown, prefix, suffix.
-     */
     protected function extractJson(string $text): ?array
     {
-        // Hapus markdown code block
         $text = preg_replace('/^```json\s*/i', '', $text);
         $text = preg_replace('/^```\s*/i', '', $text);
         $text = preg_replace('/\s*```$/', '', $text);
         $text = trim($text);
 
-        // Coba langsung decode
         $decoded = json_decode($text, true);
         if (is_array($decoded)) return $decoded;
 
-        // Kalau gagal, cari kurung kurawal pertama dan terakhir
         $start = strpos($text, '{');
         $end = strrpos($text, '}');
         if ($start !== false && $end !== false && $end > $start) {
@@ -111,9 +127,6 @@ class GeminiService
         return null;
     }
 
-    /**
-     * Bangun prompt — lebih singkat & jelas.
-     */
     protected function buildPrompt(array $reminders): string
     {
         $bulan = (string) ($reminders['periode']['bulan_nama'] ?? 'bulan ini');

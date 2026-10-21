@@ -130,7 +130,7 @@
                             <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 text-blue-700 focus:ring-blue-500" />
                             <span class="text-gray-600">Ingat saya</span>
                         </label>
-                        <a href="#" onclick="lupaPassword(event)" class="text-blue-700 hover:text-blue-900 hover:underline font-medium">
+                        <a href="{{ route('forgot-password.form') }}" class="text-blue-700 hover:text-blue-900 hover:underline font-medium">
                             Lupa password?
                         </a>
                     </div>

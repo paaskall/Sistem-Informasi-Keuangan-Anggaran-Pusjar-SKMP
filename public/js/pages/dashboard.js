@@ -935,6 +935,105 @@
     }
 
     // ============================================================
+    // AI INSIGHT (GEMINI)
+    // ============================================================
+    function loadAiInsight(forceRefresh = false) {
+        const container = document.getElementById('ai-insight-container');
+        const body = document.getElementById('ai-insight-body');
+        if (!container || !body) return;
+
+        const cacheKey = `ai_insight_${currentTahun}_${DATA.role}`;
+
+        // ⭐ Cek sessionStorage
+        if (!forceRefresh && sessionStorage.getItem(cacheKey)) {
+            try {
+                const cached = JSON.parse(sessionStorage.getItem(cacheKey));
+                renderAiInsight(cached);
+                return;
+            } catch (e) {
+                sessionStorage.removeItem(cacheKey);
+            }
+        }
+
+        container.classList.remove('hidden');
+        body.innerHTML = `
+            <div class="text-center py-3">
+                <i data-lucide="loader" class="w-4 h-4 mx-auto text-purple-400 animate-spin"></i>
+                <p class="text-[10px] text-gray-400 mt-1">Menganalisa prioritas...</p>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
+
+        const url = '/keuangan/ai-insight' + (forceRefresh ? '?refresh=1' : '');
+
+        fetch(url, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (!d.ok || !d.insight) {
+                body.innerHTML = `
+                    <div class="text-center py-3 text-xs text-gray-400">
+                        <i data-lucide="info" class="w-4 h-4 mx-auto text-gray-300 mb-1"></i>
+                        AI tidak tersedia.
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            // Simpan ke sessionStorage
+            sessionStorage.setItem(cacheKey, JSON.stringify(d.insight));
+            renderAiInsight(d.insight);
+        })
+        .catch(e => console.error('[AI Insight] Error:', e));
+    }
+
+    function renderAiInsight(ai) {
+        const body = document.getElementById('ai-insight-body');
+        if (!body) return;
+
+        const keyakinanColor = ai.tingkat_keyakinan === 'tinggi' ? 'text-green-700 bg-green-100'
+                            : ai.tingkat_keyakinan === 'sedang' ? 'text-blue-700 bg-blue-100'
+                            : 'text-amber-700 bg-amber-100';
+
+        body.innerHTML = `
+            <div class="space-y-3 relative group">
+                <button onclick="loadAiInsight(true)" class="absolute top-0 right-0 text-[10px] text-purple-600 hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Refresh AI">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
+                </button>
+
+                <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-lg p-3">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-purple-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i data-lucide="star" class="w-3 h-3"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] font-bold text-purple-700 uppercase tracking-wider">Prioritas Utama</p>
+                            <p class="text-xs font-bold text-gray-800 mt-0.5">${escapeHtml(ai.prioritas_utama)}</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-gray-600 leading-relaxed">${escapeHtml(ai.alasan)}</p>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-lg p-3">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Strategi AI</p>
+                    <p class="text-[11px] text-gray-700 leading-relaxed">${escapeHtml(ai.strategi)}</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold ${keyakinanColor} px-2 py-0.5 rounded-full">
+                        Keyakinan: ${escapeHtml(ai.tingkat_keyakinan)}
+                    </span>
+                    <span class="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                        Estimasi: ${escapeHtml(ai.estimasi_selesai)}
+                    </span>
+                </div>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // ============================================================
     // MATRIKS MANAJEMEN RISIKO (CATATAN KENDALA)
     // ============================================================
     function renderCatatanKendala(data) {
